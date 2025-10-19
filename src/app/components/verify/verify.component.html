@@ -1,0 +1,29 @@
+<div class="flex justify-center items-center min-h-screen bg-gray-100">
+  <div class="w-full max-w-md p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl font-bold mb-6 text-center">Budget Compass</h1>
+    
+    <div *ngIf="loading" class="text-center py-4">
+      <p class="mb-4">Verifying your login...</p>
+      <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto"></div>
+    </div>
+    
+    <div *ngIf="error" class="text-center">
+      <div class="mb-4 p-4 bg-red-100 text-red-700 rounded-md">
+        {{ error }}
+      </div>
+      
+      <button 
+        (click)="goToLogin()" 
+        class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      >
+        Back to Login
+      </button>
+    </div>
+    
+    <div *ngIf="!loading && !error" class="text-center">
+      <div class="mb-4 p-4 bg-green-100 text-green-700 rounded-md">
+        Login successful! Redirecting to dashboard...
+      </div>
+    </div>
+  </div>
+</div>
