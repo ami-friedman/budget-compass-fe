@@ -1,0 +1,25 @@
+// Breadcrumbs component styles
+
+:host {
+  display: block;
+}
+
+// Add hover effect for breadcrumb links
+a {
+  transition: color 0.2s ease-in-out;
+  
+  &:hover {
+    color: #4B5563; // gray-700
+  }
+}
+
+// Style for the separator
+.separator {
+  color: #9CA3AF; // gray-400
+}
+
+// Style for the current page (last item)
+.current-page {
+  font-weight: 500;
+  color: #374151; // gray-700
+}

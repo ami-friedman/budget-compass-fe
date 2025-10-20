@@ -1,0 +1,20 @@
+<div class="py-2 text-sm text-gray-500">
+  <ng-container *ngFor="let item of breadcrumbs(); let last = last; let i = index">
+    <!-- Link for items with non-empty routes that aren't the last item -->
+    <a
+      *ngIf="item.route && item.route !== '' && !last"
+      [routerLink]="item.route"
+      class="text-gray-500 hover:text-gray-700"
+    >
+      {{ item.label }}
+    </a>
+    
+    <!-- Text for the last item or items without routes -->
+    <span *ngIf="!item.route || item.route === '' || last" class="text-gray-700">
+      {{ item.label }}
+    </span>
+    
+    <!-- Separator between items -->
+    <span *ngIf="i < breadcrumbs().length - 1" class="mx-2 text-gray-400">/</span>
+  </ng-container>
+</div>

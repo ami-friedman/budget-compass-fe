@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
+  // Auth routes (not wrapped in main layout)
   {
     path: 'login',
     loadComponent: () => import('./components/login/login.component').then(m => m.LoginComponent)
@@ -10,11 +11,143 @@ export const routes: Routes = [
     path: 'verify',
     loadComponent: () => import('./components/verify/verify.component').then(m => m.VerifyComponent)
   },
+  
+  // Main application routes (wrapped in main layout)
   {
-    path: 'dashboard',
-    loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent),
-    canActivate: [authGuard]
+    path: '',
+    loadComponent: () => import('./components/layout/main-layout.component').then(m => m.MainLayoutComponent),
+    canActivate: [authGuard],
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'test-navigation',
+        loadComponent: () => import('./components/test/navigation-test.component').then(m => m.NavigationTestComponent)
+      },
+      // Placeholder routes for future implementation
+      {
+        path: 'budgets',
+        children: [
+          {
+            path: '',
+            redirectTo: 'current',
+            pathMatch: 'full'
+          },
+          {
+            path: 'current',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'history',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'create',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'categories',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          }
+        ]
+      },
+      {
+        path: 'transactions',
+        children: [
+          {
+            path: '',
+            redirectTo: 'all',
+            pathMatch: 'full'
+          },
+          {
+            path: 'all',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'new',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'recurring',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'import',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          }
+        ]
+      },
+      {
+        path: 'accounts',
+        children: [
+          {
+            path: '',
+            redirectTo: 'checking',
+            pathMatch: 'full'
+          },
+          {
+            path: 'checking',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'savings',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'transfer',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'settings',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          }
+        ]
+      },
+      {
+        path: 'reports',
+        children: [
+          {
+            path: '',
+            redirectTo: 'monthly',
+            pathMatch: 'full'
+          },
+          {
+            path: 'monthly',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'categories',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'trends',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          },
+          {
+            path: 'income-expenses',
+            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+          }
+        ]
+      },
+      {
+        path: 'settings',
+        loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'profile',
+        loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full'
+      }
+    ]
   },
+  
+  // Fallback routes
   {
     path: '',
     redirectTo: 'login',
