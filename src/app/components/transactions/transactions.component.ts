@@ -118,12 +118,21 @@ interface BudgetItemOption {
                     Category
                   </span>
                 </label>
-                <select formControlName="budget_item_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200">
-                  <option [ngValue]="null" disabled>Select a category</option>
-                  @for (option of budgetItemOptions(); track option.value) {
-                    <option [value]="option.value">{{ option.label }}</option>
-                  }
-                </select>
+                @if (activeAccountType() === 'checking') {
+                  <select formControlName="budget_item_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200">
+                    <option [ngValue]="null" disabled>Select a budget category</option>
+                    @for (option of budgetItemOptions(); track option.value) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                } @else {
+                  <select formControlName="category_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200">
+                    <option [ngValue]="null" disabled>Select a savings category</option>
+                    @for (option of budgetItemOptions(); track option.value) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                }
                 <div class="label py-1">
                   <span class="label-text-alt text-xs text-base-content/60">Choose the budget category for this transaction</span>
                 </div>
@@ -215,7 +224,7 @@ interface BudgetItemOption {
                     <tr>
                       <td>{{ transaction.transaction_date | date:'short' }}</td>
                       <td>{{ transaction.description || 'No description' }}</td>
-                      <td>{{ getCategoryNameForTransaction(transaction.budget_item_id) }}</td>
+                      <td>{{ getCategoryNameForTransaction(transaction) }}</td>
                       <td class="text-right" [ngClass]="tabs[activeTabIndex()].color">
                         {{ transaction.amount | currency:'ILS':'symbol-narrow':'1.2-2' }}
                       </td>
@@ -331,25 +340,41 @@ export class TransactionsComponent {
     const budget = this.selectedBudget();
     const budgetItems = this.budgetService.budgetItems();
     const categories = this.categoryService.categories();
+    const activeAccountType = this.activeAccountType();
     
-    if (!budget || !budgetItems.length || !categories.length) return [];
+    if (!categories.length) return [];
     
-    // Create options from budget items with category names
-    return budgetItems.map(item => {
-      const category = categories.find(cat => cat.id === item.category_id);
-      return {
-        label: category ? `${category.name} (${item.category_type})` : `Category ${item.category_id}`,
-        value: item.id,
-        categoryType: item.category_type
-      };
-    });
+    if (activeAccountType === 'checking') {
+      // For checking account: show budget items from current month (all category types)
+      if (!budget || !budgetItems.length) return [];
+      
+      return budgetItems.map(item => {
+        const category = categories.find(cat => cat.id === item.category_id);
+        return {
+          label: category ? `${category.name} (${item.category_type})` : `Category ${item.category_id}`,
+          value: item.id,
+          categoryType: item.category_type
+        };
+      });
+    } else {
+      // For savings account: show only savings categories (not budget items)
+      const savingsCategories = categories.filter(cat => cat.is_active);
+      // Note: We'll need to filter by category type "savings" once that's available in the category model
+      
+      return savingsCategories.map(category => ({
+        label: category.name,
+        value: category.id,
+        categoryType: 'savings'
+      }));
+    }
   });
 
 
   transactionForm: FormGroup = this.fb.group({
     description: [''],  // Made optional
     amount: [0, [Validators.required, Validators.min(0.01)]],
-    budget_item_id: [null, Validators.required]
+    budget_item_id: [null],  // Will be required conditionally
+    category_id: [null]      // Will be required conditionally
   });
 
   constructor() {
@@ -383,7 +408,8 @@ export class TransactionsComponent {
       this.transactionForm.reset({
         description: '',
         amount: 0,
-        budget_item_id: null
+        budget_item_id: null,
+        category_id: null
       });
     }
   }
@@ -402,15 +428,24 @@ export class TransactionsComponent {
       : this.transactionService.savingsTotal();
   }
 
-  getCategoryNameForTransaction(budgetItemId: number): string {
-    const budgetItems = this.budgetService.budgetItems();
+  getCategoryNameForTransaction(transaction: any): string {
     const categories = this.categoryService.categories();
     
-    const budgetItem = budgetItems.find(item => item.id === budgetItemId);
-    if (!budgetItem) return `Budget Item #${budgetItemId}`;
+    if (transaction.account_type === 'checking' && transaction.budget_item_id) {
+      // For checking transactions, get category through budget item
+      const budgetItems = this.budgetService.budgetItems();
+      const budgetItem = budgetItems.find(item => item.id === transaction.budget_item_id);
+      if (!budgetItem) return `Budget Item #${transaction.budget_item_id}`;
+      
+      const category = categories.find(cat => cat.id === budgetItem.category_id);
+      return category ? category.name : `Category ${budgetItem.category_id}`;
+    } else if (transaction.account_type === 'savings' && transaction.category_id) {
+      // For savings transactions, get category directly
+      const category = categories.find(cat => cat.id === transaction.category_id);
+      return category ? category.name : `Category #${transaction.category_id}`;
+    }
     
-    const category = categories.find(cat => cat.id === budgetItem.category_id);
-    return category ? category.name : `Category ${budgetItem.category_id}`;
+    return 'Unknown Category';
   }
 
   resetForm() {
@@ -419,7 +454,8 @@ export class TransactionsComponent {
     this.transactionForm.reset({
       description: '',
       amount: 0,
-      budget_item_id: null
+      budget_item_id: null,
+      category_id: null
     });
   }
 
@@ -429,7 +465,8 @@ export class TransactionsComponent {
     this.transactionForm.patchValue({
       description: transaction.description,
       amount: transaction.amount,
-      budget_item_id: transaction.budget_item_id
+      budget_item_id: transaction.budget_item_id || null,
+      category_id: transaction.category_id || null
     });
     
     // Switch to the appropriate tab based on transaction's account type
@@ -450,11 +487,33 @@ export class TransactionsComponent {
     }
 
     const formValue = this.transactionForm.value;
+    const accountType = this.activeAccountType() as 'checking' | 'savings';
+    
+    // Validate based on account type
+    if (accountType === 'checking' && !formValue.budget_item_id) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please select a budget category for checking account transactions'
+      });
+      return;
+    }
+    
+    if (accountType === 'savings' && !formValue.category_id) {
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Error',
+        detail: 'Please select a savings category for savings account transactions'
+      });
+      return;
+    }
+    
     const transactionData: TransactionCreate = {
       description: formValue.description,
       amount: formValue.amount,
-      budget_item_id: formValue.budget_item_id,
-      account_type: this.activeAccountType() as 'checking' | 'savings'
+      budget_item_id: accountType === 'checking' ? formValue.budget_item_id : undefined,
+      category_id: accountType === 'savings' ? formValue.category_id : undefined,
+      account_type: accountType
     };
 
     try {

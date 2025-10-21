@@ -8,7 +8,8 @@ export interface Transaction {
   description?: string;  // Made optional
   transaction_date: string;
   account_type: 'checking' | 'savings';
-  budget_item_id: number;
+  budget_item_id?: number;  // For checking account transactions
+  category_id?: number;     // For savings account transactions
   is_active: boolean;
   created_at: string;
 }
@@ -17,7 +18,8 @@ export interface TransactionCreate {
   amount: number;
   description?: string;  // Made optional
   transaction_date?: string;
-  budget_item_id: number;
+  budget_item_id?: number;  // For checking account transactions
+  category_id?: number;     // For savings account transactions
   account_type: 'checking' | 'savings';
 }
 
@@ -25,7 +27,8 @@ export interface TransactionUpdate {
   amount?: number;
   description?: string;
   transaction_date?: string;
-  budget_item_id?: number;
+  budget_item_id?: number;  // For checking account transactions
+  category_id?: number;     // For savings account transactions
   account_type?: 'checking' | 'savings';
 }
 
