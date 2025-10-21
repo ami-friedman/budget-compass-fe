@@ -77,11 +77,11 @@ export class TransactionService {
   );
 
   readonly checkingTotal = computed(() =>
-    this.checkingTransactions().reduce((sum, t) => sum + t.amount, 0)
+    this.checkingTransactions().reduce((sum, t) => sum + Number(t.amount), 0)
   );
 
   readonly savingsTotal = computed(() =>
-    this.savingsTransactions().reduce((sum, t) => sum + t.amount, 0)
+    this.savingsTransactions().reduce((sum, t) => sum + Number(t.amount), 0)
   );
 
   readonly totalTransactions = computed(() =>
@@ -98,6 +98,15 @@ export class TransactionService {
     }
   }
 
+  setSelectedBudgetAndAccount(budgetId: number | null, accountType: 'checking' | 'savings' | null = null): void {
+    this.selectedBudgetIdSignal.set(budgetId);
+    if (budgetId) {
+      this.loadTransactionsForBudgetAndAccount(budgetId, accountType);
+    } else {
+      this.transactionsSignal.set([]);
+    }
+  }
+
   async loadTransactionsForBudget(budgetId: number): Promise<void> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);
@@ -107,6 +116,26 @@ export class TransactionService {
         `${this.baseUrl}?budget_id=${budgetId}`
       ).toPromise();
 
+      this.transactionsSignal.set(transactions || []);
+    } catch (error) {
+      console.error('Error loading transactions:', error);
+      this.errorSignal.set('Failed to load transactions');
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  async loadTransactionsForBudgetAndAccount(budgetId: number, accountType: 'checking' | 'savings' | null = null): Promise<void> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      let url = `${this.baseUrl}?budget_id=${budgetId}`;
+      if (accountType) {
+        url += `&account_type=${accountType}`;
+      }
+      
+      const transactions = await this.http.get<Transaction[]>(url).toPromise();
       this.transactionsSignal.set(transactions || []);
     } catch (error) {
       console.error('Error loading transactions:', error);
@@ -145,10 +174,19 @@ export class TransactionService {
       ).toPromise();
 
       if (newTransaction) {
-        // Add to current transactions
-        this.transactionsSignal.update(transactions => 
-          [...transactions, newTransaction]
-        );
+        // Debug logging
+        console.log('New transaction created:', newTransaction);
+        console.log('Current transactions before update:', this.transactionsSignal().length);
+        
+        // Add to current transactions with explicit signal update
+        const currentTransactions = this.transactionsSignal();
+        const updatedTransactions = [...currentTransactions, newTransaction];
+        this.transactionsSignal.set(updatedTransactions);
+        
+        console.log('Current transactions after update:', this.transactionsSignal().length);
+        console.log('Checking transactions:', this.checkingTransactions().length);
+        console.log('Savings transactions:', this.savingsTransactions().length);
+        
         return newTransaction;
       }
       return null;

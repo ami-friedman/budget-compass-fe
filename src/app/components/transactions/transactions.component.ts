@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, effect, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { TableModule } from 'primeng/table';
@@ -291,7 +291,7 @@ interface BudgetItemOption {
     }
   `]
 })
-export class TransactionsComponent implements OnInit {
+export class TransactionsComponent {
   transactionService = inject(TransactionService);
   budgetService = inject(BudgetService);
   categoryService = inject(CategoryService);
@@ -352,14 +352,27 @@ export class TransactionsComponent implements OnInit {
     budget_item_id: [null, Validators.required]
   });
 
-  ngOnInit() {
-    // Load transactions when a budget is selected
-    const budgetId = this.selectedBudget()?.id;
-    if (budgetId) {
-      this.transactionService.setSelectedBudget(budgetId);
+  constructor() {
+    // Ensure budget service is initialized (fallback in case APP_INITIALIZER didn't run)
+    if (!this.selectedBudget()) {
+      this.budgetService.initialize();
     }
-    
-    // Ensure categories are loaded
+
+    // Reactive effect to load transactions when the selected budget changes
+    effect(() => {
+      const budget = this.selectedBudget();
+      
+      if (budget) {
+        // Always load ALL transactions for the budget (both checking and savings)
+        // The UI will filter them appropriately based on the active tab
+        this.transactionService.setSelectedBudget(budget.id);
+      } else {
+        // If there's no budget, clear the transactions
+        this.transactionService.clearTransactions();
+      }
+    });
+
+    // Ensure categories are loaded for the dropdown
     this.categoryService.loadCategories().subscribe();
   }
 
@@ -377,9 +390,14 @@ export class TransactionsComponent implements OnInit {
 
   getAccountTransactions() {
     const accountType = this.activeAccountType();
-    return accountType === 'checking'
+    const transactions = accountType === 'checking'
       ? this.transactionService.checkingTransactions()
       : this.transactionService.savingsTransactions();
+    
+    // Debug logging to help troubleshoot
+    console.log(`Component getAccountTransactions() - ${accountType}:`, transactions.length, 'transactions');
+    
+    return transactions;
   }
 
   getAccountTotal() {
@@ -463,11 +481,7 @@ export class TransactionsComponent implements OnInit {
             summary: 'Success',
             detail: 'Transaction created successfully'
           });
-          // Reload transactions to ensure the list is updated
-          const budgetId = this.selectedBudget()?.id;
-          if (budgetId) {
-            this.transactionService.setSelectedBudget(budgetId);
-          }
+          // The service handles the optimistic update, no need to reload.
         }
       }
       this.resetForm();
