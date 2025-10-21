@@ -49,7 +49,7 @@ export class NavigationService {
     switch (section) {
       case 'budgets':
         this.secondaryNavItemsSignal.set([
-          { label: 'Budget', route: '/budgets/current' },
+          { label: 'Budget', route: '/budgets' },
           { label: 'Categories', route: '/budgets/categories' }
         ]);
         this.showSecondaryNavSignal.set(true);

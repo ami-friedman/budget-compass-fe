@@ -12,12 +12,11 @@
         {{ error }}
       </div>
       
-      <button 
-        (click)="goToLogin()" 
-        class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-      >
-        Back to Login
-      </button>
+      <p-button
+        (click)="goToLogin()"
+        label="Back to Login"
+        styleClass="w-full"
+      ></p-button>
     </div>
     
     <div *ngIf="!loading && !error" class="text-center">

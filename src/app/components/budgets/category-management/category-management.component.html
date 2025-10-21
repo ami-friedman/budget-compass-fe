@@ -13,7 +13,7 @@
         class="input input-bordered w-full max-w-xs mr-2"
         style="color: black;"
       />
-      <button (click)="addCategory()" class="btn btn-primary">Add</button>
+      <p-button (click)="addCategory()" label="Add"></p-button>
     </div>
   </div>
 
@@ -46,11 +46,11 @@
             </td>
             <td class="text-right">
               @if (editingCategoryId === category.id) {
-                <button (click)="saveCategory(category.id)" class="btn btn-sm btn-success mr-2">Save</button>
-                <button (click)="cancelEdit()" class="btn btn-sm btn-ghost">Cancel</button>
+                <p-button (click)="saveCategory(category.id)" icon="pi pi-check" styleClass="p-button-sm p-button-success mr-2"></p-button>
+                <p-button (click)="cancelEdit()" icon="pi pi-times" styleClass="p-button-sm p-button-ghost"></p-button>
               } @else {
-                <button (click)="startEdit(category)" class="btn btn-sm btn-ghost mr-2">Edit</button>
-                <button (click)="archiveCategory(category.id)" class="btn btn-sm btn-error">Archive</button>
+                <p-button (click)="startEdit(category)" icon="pi pi-pencil" styleClass="p-button-sm p-button-ghost mr-2"></p-button>
+                <p-button (click)="archiveCategory(category.id)" icon="pi pi-archive" styleClass="p-button-sm p-button-danger"></p-button>
               }
             </td>
           </tr>

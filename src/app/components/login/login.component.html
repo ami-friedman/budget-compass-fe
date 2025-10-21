@@ -25,14 +25,13 @@
         >
       </div>
       
-      <button 
-        type="submit" 
-        class="w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      <p-button
+        type="submit"
+        label="{{loading ? 'Sending...' : 'Send Magic Link'}}"
+        styleClass="w-full"
         [disabled]="loading"
-      >
-        <span *ngIf="loading">Sending...</span>
-        <span *ngIf="!loading">Send Magic Link</span>
-      </button>
+        [loading]="loading"
+      ></p-button>
     </form>
   </div>
 </div>

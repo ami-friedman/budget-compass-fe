@@ -5,11 +5,12 @@ import { Subscription, filter } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { NavigationService } from '../../services/navigation.service';
 import { BreadcrumbsComponent } from './breadcrumbs/breadcrumbs.component';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterModule, BreadcrumbsComponent],
+  imports: [CommonModule, RouterModule, BreadcrumbsComponent, ButtonModule],
   templateUrl: './main-layout.component.html',
   styleUrls: ['./main-layout.component.scss']
 })

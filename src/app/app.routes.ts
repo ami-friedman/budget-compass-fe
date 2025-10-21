@@ -32,12 +32,8 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'current',
+            loadComponent: () => import('./components/budgets/budget-selector/budget-selector.component').then(m => m.BudgetSelectorComponent),
             pathMatch: 'full'
-          },
-          {
-            path: 'current',
-            loadComponent: () => import('./components/budgets/budget-selector/budget-selector.component').then(m => m.BudgetSelectorComponent)
           },
           {
             path: 'create',

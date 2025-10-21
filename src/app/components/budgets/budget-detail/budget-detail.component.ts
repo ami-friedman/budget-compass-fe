@@ -7,11 +7,12 @@ import { HttpClient } from '@angular/common/http';
 import { BudgetService, Budget, BudgetItem } from '../../../services/budget.service';
 import { CategoryService, Category } from '../../../services/category.service';
 import { NavigationService } from '../../../services/navigation.service';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-budget-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, ButtonModule],
   templateUrl: './budget-detail.component.html',
   styleUrls: ['./budget-detail.component.scss']
 })
