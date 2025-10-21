@@ -50,12 +50,12 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'all',
+            loadComponent: () => import('./components/transactions/transactions.component').then(m => m.TransactionsComponent),
             pathMatch: 'full'
           },
           {
             path: 'all',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+            loadComponent: () => import('./components/transactions/transactions.component').then(m => m.TransactionsComponent)
           },
           {
             path: 'new',

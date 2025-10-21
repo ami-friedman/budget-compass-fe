@@ -1,0 +1,100 @@
+// Transactions component styles
+.transactions-container {
+  padding: 1.5rem;
+}
+
+:host ::ng-deep .p-table .p-table-tbody > tr > td {
+  padding: 0.75rem;
+}
+
+:host ::ng-deep .p-button.p-button-sm {
+  padding: 0.25rem 0.5rem;
+}
+
+// Custom tab styling to match the budget detail component
+.tab-navigation {
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.tab-button {
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  
+  &.active {
+    border-bottom-color: var(--primary-color);
+    color: var(--primary-color);
+  }
+  
+  &:hover:not(.active) {
+    border-bottom-color: var(--surface-300);
+    color: var(--text-color);
+  }
+}
+
+// Summary card styling
+.summary-card {
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+// Form styling
+.form-section {
+  background: var(--surface-card);
+  border: 1px solid var(--surface-border);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: box-shadow 0.2s ease;
+  
+  &:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  }
+}
+
+// Table styling
+.transactions-table {
+  background: var(--surface-card);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+// Empty state styling
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  
+  svg {
+    width: 3rem;
+    height: 3rem;
+    color: var(--text-color-secondary);
+    margin-bottom: 0.5rem;
+  }
+  
+  p {
+    color: var(--text-color-secondary);
+    margin-bottom: 0.25rem;
+  }
+  
+  .empty-description {
+    font-size: 0.875rem;
+    color: var(--text-color-secondary);
+    opacity: 0.7;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .transactions-container {
+    padding: 1rem;
+  }
+  
+  .form-section {
+    margin-bottom: 1rem;
+  }
+  
+  .tab-button {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+}
