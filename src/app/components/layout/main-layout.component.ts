@@ -79,7 +79,8 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
    * Update breadcrumbs based on URL
    */
   private updateBreadcrumbs(url: string): void {
-    const segments = url.split('/').filter(segment => segment);
+    const urlWithoutQuery = url.split('?')[0];
+    const segments = urlWithoutQuery.split('/').filter(segment => segment);
     
     if (segments.length === 0) {
       this.navigationService.clearBreadcrumbs();

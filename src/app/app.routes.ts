@@ -36,10 +36,6 @@ export const routes: Routes = [
             pathMatch: 'full'
           },
           {
-            path: 'create',
-            loadComponent: () => import('./components/budgets/create-budget/create-budget.component').then(m => m.CreateBudgetComponent)
-          },
-          {
             path: 'categories',
             loadComponent: () => import('./components/budgets/category-management/category-management.component').then(m => m.CategoryManagementComponent)
           },

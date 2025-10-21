@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { BudgetService } from '../../../services/budget.service';
+import { BudgetService, BudgetCreate } from '../../../services/budget.service';
 
 @Component({
   selector: 'app-budget-selector',
@@ -162,9 +162,22 @@ export class BudgetSelectorComponent implements OnInit {
         this.router.navigate(['/budgets', existingBudget.id]);
       }
     } else {
-      // Navigate to create budget with pre-filled values
-      this.router.navigate(['/budgets/create'], { 
-        queryParams: { month, year } 
+      // Create the budget directly
+      const budgetData: BudgetCreate = {
+        month,
+        year,
+        name: `Budget for ${this.budgetService.getMonthName(month)} ${year}`
+      };
+
+      this.budgetService.createBudget(budgetData).subscribe({
+        next: (budget) => {
+          // Navigate to the budget detail page
+          this.router.navigate(['/budgets', budget.id]);
+        },
+        error: (error) => {
+          console.error('Error creating budget from selector:', error);
+          // Error is handled by the service and displayed via the error signal
+        }
       });
     }
   }

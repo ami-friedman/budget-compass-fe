@@ -1,1 +1,123 @@
-/* Empty SCSS file */
+/* Category Management Styles */
+
+/* Ensure proper text colors for inputs */
+.p-inputtext {
+  color: #374151 !important;
+  background-color: white !important;
+}
+
+/* Dropdown container for click-outside functionality */
+.dropdown-container {
+  position: relative;
+}
+
+/* Dropdown content positioning */
+.dropdown-content {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+/* Category item hover effects */
+.category-item {
+  transition: background-color 0.2s ease;
+}
+
+.category-item:hover {
+  background-color: #f9fafb;
+}
+
+/* Button spacing in dropdown */
+.action-buttons {
+  gap: 0.5rem;
+}
+
+/* Ensure proper contrast for text */
+.text-gray-900 {
+  color: #111827 !important;
+}
+
+/* Override any dark theme text colors */
+input[type="text"] {
+  color: #374151 !important;
+  background-color: white !important;
+}
+
+/* Grid layout responsive adjustments */
+.grid {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.grid-cols-1 {
+  grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+@media (min-width: 1024px) {
+  .lg\:grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Ensure cards have equal height */
+:host ::ng-deep .p-card {
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+:host ::ng-deep .p-card .p-card-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Grid items should have equal height */
+.grid > div {
+  display: flex;
+  flex-direction: column;
+}
+
+/* PrimeNG input overrides */
+:host ::ng-deep .p-inputtext {
+  color: #374151 !important;
+  background-color: white !important;
+  border: 1px solid #d1d5db;
+}
+
+:host ::ng-deep .p-inputtext:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 1px #3b82f6;
+}
+
+:host ::ng-deep .p-card .p-card-header {
+  background-color: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  color: #374151;
+  font-weight: 600;
+}
+
+:host ::ng-deep .p-card .p-card-body {
+  background-color: white;
+  color: #374151;
+}
+
+/* Dropdown z-index to ensure it appears above other elements */
+.relative.z-10 {
+  position: relative;
+  z-index: 10;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 1023px) {
+  .grid-cols-1 {
+    grid-template-columns: 1fr;
+  }
+  
+  .dropdown-container {
+    margin-top: 1rem;
+  }
+}

@@ -1,13 +1,15 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CategoryService } from '../../../services/category.service';
 import { FormsModule } from '@angular/forms';
 import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { CardModule } from 'primeng/card';
 
 @Component({
   selector: 'app-category-management',
   standalone: true,
-  imports: [CommonModule, FormsModule, ButtonModule],
+  imports: [CommonModule, FormsModule, ButtonModule, InputTextModule, CardModule],
   templateUrl: './category-management.component.html',
   styleUrls: ['./category-management.component.scss']
 })
@@ -18,6 +20,9 @@ export class CategoryManagementComponent {
   newCategoryName = '';
   editingCategoryId: number | null = null;
   editingCategoryName = '';
+  selectedCategory: any = null;
+  showDropdown = false;
+  searchValue = '';
 
   addCategory() {
     if (this.newCategoryName.trim()) {
@@ -56,6 +61,30 @@ export class CategoryManagementComponent {
       this.categoryService.archiveCategory(categoryId).subscribe({
         error: (err) => console.error('Error archiving category', err)
       });
+    }
+  }
+
+  toggleDropdown() {
+    this.showDropdown = !this.showDropdown;
+  }
+
+  selectCategory(category: any) {
+    this.selectedCategory = category;
+    this.showDropdown = false;
+  }
+
+  clearSelection() {
+    this.selectedCategory = null;
+    this.showDropdown = false;
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    const dropdownElement = target.closest('.dropdown-container');
+    
+    if (!dropdownElement && this.showDropdown) {
+      this.showDropdown = false;
     }
   }
 }
