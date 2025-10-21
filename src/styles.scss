@@ -4,25 +4,3 @@
 @import "ag-grid-community/styles/ag-grid.css";
 @import "ag-grid-community/styles/ag-theme-alpine.css";
 
-/* Global styles */
-/* Fix for white text on white background in form controls */
-select,
-input,
-textarea {
-  @apply text-gray-800;
-}
-
-/* Fix for dropdown options */
-option {
-  @apply text-gray-800 bg-white;
-}
-
-/* Fix for form labels */
-label {
-  @apply text-gray-700;
-}
-
-/* Fix for placeholder text */
-::placeholder {
-  @apply text-gray-500;
-}

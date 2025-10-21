@@ -4,7 +4,8 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
-import { BudgetService, Budget, BudgetItem, Category } from '../../../services/budget.service';
+import { BudgetService, Budget, BudgetItem } from '../../../services/budget.service';
+import { CategoryService, Category } from '../../../services/category.service';
 import { NavigationService } from '../../../services/navigation.service';
 
 @Component({
@@ -16,6 +17,7 @@ import { NavigationService } from '../../../services/navigation.service';
 })
 export class BudgetDetailComponent implements OnInit {
   private budgetService = inject(BudgetService);
+  private categoryService = inject(CategoryService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private formBuilder = inject(FormBuilder);
@@ -25,37 +27,24 @@ export class BudgetDetailComponent implements OnInit {
   // Signals from the budget service
   loading = this.budgetService.loading;
   error = this.budgetService.error;
-  categories = this.budgetService.categories;
+  
+  // Data signals
   budgetItems = this.budgetService.budgetItems;
-  budgetSummary = this.budgetService.budgetSummary;
-  
-  // Category groups
-  incomeCategories = this.budgetService.incomeCategories;
-  savingsCategories = this.budgetService.savingsCategories;
-  cashCategories = this.budgetService.cashCategories;
-  monthlyCategories = this.budgetService.monthlyCategories;
-  
-  // Computed signals for filtered budget items
-  incomeBudgetItems = computed(() =>
-    this.budgetItems().filter(item => this.getCategoryType(item.category_id) === 'income')
-  );
-  
-  savingsBudgetItems = computed(() =>
-    this.budgetItems().filter(item => this.getCategoryType(item.category_id) === 'savings')
-  );
-  
-  monthlyBudgetItems = computed(() =>
-    this.budgetItems().filter(item => this.getCategoryType(item.category_id) === 'monthly')
-  );
-  
-  cashBudgetItems = computed(() =>
-    this.budgetItems().filter(item => this.getCategoryType(item.category_id) === 'cash')
-  );
+  categories = this.categoryService.categories;
   
   // Component state
   budget: Budget | null = null;
   budgetItemForm!: FormGroup;
-  selectedCategoryType: string = 'income';
+  editingItemId: number | null = null;
+  
+  // Computed signals for grouping budget items
+  checkingItems = computed(() =>
+    this.budgetItems().filter(item => item.account_type === 'checking')
+  );
+  
+  savingsItems = computed(() =>
+    this.budgetItems().filter(item => item.account_type === 'savings')
+  );
   
   ngOnInit(): void {
     // Get the budget ID from the route
@@ -71,11 +60,6 @@ export class BudgetDetailComponent implements OnInit {
     
     // Initialize the budget item form
     this.initBudgetItemForm();
-    
-    // Load categories if not already loaded
-    if (this.categories().length === 0) {
-      this.budgetService.loadCategories();
-    }
   }
   
   loadBudget(budgetId: number): void {
@@ -98,59 +82,84 @@ export class BudgetDetailComponent implements OnInit {
     });
   }
   
-  initBudgetItemForm(): void {
+  initBudgetItemForm(item?: BudgetItem): void {
     this.budgetItemForm = this.formBuilder.group({
-      category_id: [null, Validators.required],
-      amount: [null, [Validators.required, Validators.min(0)]]
+      category_id: [item?.category_id || null, Validators.required],
+      amount: [item?.amount || null, [Validators.required, Validators.min(0.01)]],
+      account_type: [item?.account_type || 'checking', Validators.required]
     });
+    
+    this.editingItemId = item?.id || null;
   }
-  
-  onCategoryTypeChange(type: string): void {
-    this.selectedCategoryType = type;
-    // Reset the category selection
-    this.budgetItemForm.get('category_id')?.setValue(null);
-  }
-  
+
   onSubmit(): void {
-    if (this.budgetItemForm.invalid || !this.budget) {
+    if (this.budgetItemForm.invalid) {
       return;
     }
     
-    const budgetItem: any = {
-      ...this.budgetItemForm.value,
-      budget_id: this.budget.id
-    };
+    const budgetId = this.budget?.id;
+    if (!budgetId) return;
     
-    this.budgetService.createBudgetItem(budgetItem).subscribe({
-      next: () => {
-        // Reset the form
-        this.budgetItemForm.reset({
-          category_id: null,
-          amount: null
+    if (this.editingItemId) {
+      // Update existing item
+      this.http.put(`${this.budgetService['apiUrl']}/${budgetId}/items/${this.editingItemId}`, this.budgetItemForm.value)
+        .subscribe({
+          next: (updatedItem: any) => {
+            // Update the local state
+            this.budgetService.loadBudgetItems(budgetId);
+            this.resetForm();
+          },
+          error: (error) => {
+            console.error('Error updating budget item:', error);
+          }
         });
-      },
-      error: (error) => {
-        console.error('Error creating budget item:', error);
-      }
+    } else {
+      // Create new item
+      this.budgetService.createBudgetItem(this.budgetItemForm.value).subscribe({
+        next: () => {
+          this.resetForm();
+        },
+        error: (error) => {
+          console.error('Error creating budget item:', error);
+        }
+      });
+    }
+  }
+  
+  resetForm(): void {
+    this.budgetItemForm.reset({
+      category_id: null,
+      amount: null,
+      account_type: 'checking'
     });
+    this.editingItemId = null;
   }
-  
-  // Helper methods
-  getMonthName(month: number): string {
-    return this.budgetService.getMonthName(month);
-  }
-  
-  getCategoryById(categoryId: number): Category | undefined {
-    return this.categories().find(c => c.id === categoryId);
-  }
-  
+
   getCategoryName(categoryId: number): string {
-    const category = this.getCategoryById(categoryId);
-    return category ? category.name : 'Unknown Category';
+    const category = this.categories().find(c => c.id === categoryId);
+    return category ? category.name : 'Unknown';
   }
   
-  getCategoryType(categoryId: number): string {
-    const category = this.getCategoryById(categoryId);
-    return category ? category.type : '';
+  editBudgetItem(item: BudgetItem): void {
+    this.initBudgetItemForm(item);
+    // Scroll to the form
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  
+  deleteBudgetItem(itemId: number): void {
+    if (confirm('Are you sure you want to delete this budget item?')) {
+      const budgetId = this.budget?.id;
+      if (!budgetId) return;
+      
+      this.http.delete(`${this.budgetService['apiUrl']}/${budgetId}/items/${itemId}`).subscribe({
+        next: () => {
+          // Update the local state
+          this.budgetService.removeBudgetItem(itemId);
+        },
+        error: (error) => {
+          console.error('Error deleting budget item:', error);
+        }
+      });
+    }
   }
 }

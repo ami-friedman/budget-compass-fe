@@ -44,12 +44,12 @@ export const routes: Routes = [
             loadComponent: () => import('./components/budgets/create-budget/create-budget.component').then(m => m.CreateBudgetComponent)
           },
           {
-            path: ':id',
-            loadComponent: () => import('./components/budgets/budget-detail/budget-detail.component').then(m => m.BudgetDetailComponent)
+            path: 'categories',
+            loadComponent: () => import('./components/budgets/category-management/category-management.component').then(m => m.CategoryManagementComponent)
           },
           {
-            path: 'categories',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+            path: ':id',
+            loadComponent: () => import('./components/budgets/budget-detail/budget-detail.component').then(m => m.BudgetDetailComponent)
           }
         ]
       },

@@ -1,270 +1,147 @@
-<div class="max-w-6xl mx-auto py-6">
-  <!-- Loading indicator -->
-  @if (loading()) {
-    <div class="flex justify-center my-8">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+<div class="container mx-auto p-4">
+  @if (budget) {
+    <div class="mb-6">
+      <h2 class="text-3xl font-bold">{{ budget.name }}</h2>
     </div>
-  }
-  
-  <!-- Error message -->
-  @if (error()) {
-    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-      <p>{{ error() }}</p>
-    </div>
-  }
-  
-  <!-- Budget details -->
-  @if (budget && !loading()) {
-    <div class="flex justify-end items-center mb-6">
-      <div class="text-gray-600">
-        {{ getMonthName(budget.month) }} {{ budget.year }}
-      </div>
-    </div>
-    
-    
-    <!-- Budget summary -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-sm font-medium text-gray-500">Income</h3>
-        <p class="text-2xl font-bold text-green-600">${{ budgetSummary().totalIncome.toFixed(2) }}</p>
-      </div>
-      
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-sm font-medium text-gray-500">Expenses</h3>
-        <p class="text-2xl font-bold text-red-600">${{ budgetSummary().totalExpenses.toFixed(2) }}</p>
-      </div>
-      
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-sm font-medium text-gray-500">Balance</h3>
-        <p class="text-2xl font-bold" [ngClass]="budgetSummary().balance >= 0 ? 'text-green-600' : 'text-red-600'">
-          ${{ budgetSummary().balance.toFixed(2) }}
-        </p>
-      </div>
-      
-      <div class="bg-white shadow rounded-lg p-4">
-        <h3 class="text-sm font-medium text-gray-500">Savings</h3>
-        <p class="text-2xl font-bold text-blue-600">${{ budgetSummary().savingsAmount.toFixed(2) }}</p>
-      </div>
-    </div>
-    
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Budget items list -->
-      <div class="lg:col-span-2">
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-          <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h2 class="text-lg font-medium text-gray-900">Budget Allocations</h2>
-          </div>
-          
-          <!-- Income section -->
-          <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 class="text-md font-medium text-gray-700">Income</h3>
-          </div>
-          @if (incomeBudgetItems().length === 0) {
-            <div class="px-4 py-3 text-gray-500 italic">
-              No income categories allocated
-            </div>
-          }
-          @if (incomeBudgetItems().length > 0) {
-            <ul class="divide-y divide-gray-200">
-              @for (item of incomeBudgetItems(); track item.id) {
-                <li class="px-4 py-3 flex justify-between items-center">
-                  <span class="text-gray-800">{{ getCategoryName(item.category_id) }}</span>
-                  <span class="font-medium text-green-600">${{ item.amount.toFixed(2) }}</span>
-                </li>
+
+    <!-- Add Budget Item Form -->
+    <div class="mb-8 p-4 border rounded-lg shadow-sm bg-base-100">
+      <h3 class="text-xl font-semibold mb-4">
+        @if (editingItemId) {
+          Edit Budget Item
+        } @else {
+          Add New Budget Item
+        }
+      </h3>
+      <form [formGroup]="budgetItemForm" (ngSubmit)="onSubmit()">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Category Dropdown -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Category</span>
+            </label>
+            <select formControlName="category_id" class="select select-bordered">
+              <option [ngValue]="null" disabled>Select a category</option>
+              @for (category of categories(); track category.id) {
+                <option [value]="category.id">{{ category.name }}</option>
               }
-            </ul>
-          }
-          
-          <!-- Savings section -->
-          <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 class="text-md font-medium text-gray-700">Savings</h3>
+            </select>
           </div>
-          @if (savingsBudgetItems().length === 0) {
-            <div class="px-4 py-3 text-gray-500 italic">
-              No savings categories allocated
+
+          <!-- Amount Input -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Amount</span>
+            </label>
+            <input type="number" formControlName="amount" placeholder="0.00" class="input input-bordered" />
+          </div>
+
+          <!-- Account Type Radio -->
+          <div class="form-control">
+            <label class="label">
+              <span class="label-text">Account</span>
+            </label>
+            <div class="flex gap-4">
+              <label class="flex items-center">
+                <input type="radio" formControlName="account_type" value="checking" class="radio radio-primary" />
+                <span class="ml-2">Checking</span>
+              </label>
+              <label class="flex items-center">
+                <input type="radio" formControlName="account_type" value="savings" class="radio radio-primary" />
+                <span class="ml-2">Savings</span>
+              </label>
             </div>
-          }
-          @if (savingsBudgetItems().length > 0) {
-            <ul class="divide-y divide-gray-200">
-              @for (item of savingsBudgetItems(); track item.id) {
-                <li class="px-4 py-3 flex justify-between items-center">
-                  <span class="text-gray-800">{{ getCategoryName(item.category_id) }}</span>
-                  <span class="font-medium text-blue-600">${{ item.amount.toFixed(2) }}</span>
-                </li>
-              }
-            </ul>
-          }
-          
-          <!-- Monthly section -->
-          <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 class="text-md font-medium text-gray-700">Monthly Expenses</h3>
-          </div>
-          @if (monthlyBudgetItems().length === 0) {
-            <div class="px-4 py-3 text-gray-500 italic">
-              No monthly expense categories allocated
-            </div>
-          }
-          @if (monthlyBudgetItems().length > 0) {
-            <ul class="divide-y divide-gray-200">
-              @for (item of monthlyBudgetItems(); track item.id) {
-                <li class="px-4 py-3 flex justify-between items-center">
-                  <span class="text-gray-800">{{ getCategoryName(item.category_id) }}</span>
-                  <span class="font-medium text-red-600">${{ item.amount.toFixed(2) }}</span>
-                </li>
-              }
-            </ul>
-          }
-          
-          <!-- Cash section -->
-          <div class="px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 class="text-md font-medium text-gray-700">Cash Expenses</h3>
-          </div>
-          @if (cashBudgetItems().length === 0) {
-            <div class="px-4 py-3 text-gray-500 italic">
-              No cash expense categories allocated
-            </div>
-          }
-          @if (cashBudgetItems().length > 0) {
-            <ul class="divide-y divide-gray-200">
-              @for (item of cashBudgetItems(); track item.id) {
-                <li class="px-4 py-3 flex justify-between items-center">
-                  <span class="text-gray-800">{{ getCategoryName(item.category_id) }}</span>
-                  <span class="font-medium text-red-600">${{ item.amount.toFixed(2) }}</span>
-                </li>
-              }
-            </ul>
-          }
-        </div>
-      </div>
-      
-      <!-- Add budget item form -->
-      <div class="lg:col-span-1">
-        <div class="bg-white shadow rounded-lg overflow-hidden">
-          <div class="px-4 py-5 border-b border-gray-200 sm:px-6">
-            <h2 class="text-lg font-medium text-gray-900">Add Budget Item</h2>
-          </div>
-          
-          <div class="p-4">
-            <form [formGroup]="budgetItemForm" (ngSubmit)="onSubmit()" class="space-y-4">
-              <!-- Category type selection -->
-              <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Category Type</label>
-                <div class="flex flex-wrap gap-2">
-                  <button 
-                    type="button" 
-                    class="px-3 py-1 rounded-md text-sm"
-                    [ngClass]="selectedCategoryType === 'income' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'"
-                    (click)="onCategoryTypeChange('income')"
-                  >
-                    Income
-                  </button>
-                  <button 
-                    type="button" 
-                    class="px-3 py-1 rounded-md text-sm"
-                    [ngClass]="selectedCategoryType === 'savings' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'"
-                    (click)="onCategoryTypeChange('savings')"
-                  >
-                    Savings
-                  </button>
-                  <button 
-                    type="button" 
-                    class="px-3 py-1 rounded-md text-sm"
-                    [ngClass]="selectedCategoryType === 'monthly' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'"
-                    (click)="onCategoryTypeChange('monthly')"
-                  >
-                    Monthly
-                  </button>
-                  <button 
-                    type="button" 
-                    class="px-3 py-1 rounded-md text-sm"
-                    [ngClass]="selectedCategoryType === 'cash' ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'"
-                    (click)="onCategoryTypeChange('cash')"
-                  >
-                    Cash
-                  </button>
-                </div>
-              </div>
-              
-              <!-- Category selection -->
-              <div>
-                <label for="category_id" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select 
-                  id="category_id" 
-                  formControlName="category_id"
-                  class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option [ngValue]="null" disabled>Select a category</option>
-                  @if (selectedCategoryType === 'income') {
-                    @for (category of incomeCategories(); track category.id) {
-                      <option [value]="category.id">{{ category.name }}</option>
-                    }
-                  }
-                  @if (selectedCategoryType === 'savings') {
-                    @for (category of savingsCategories(); track category.id) {
-                      <option [value]="category.id">{{ category.name }}</option>
-                    }
-                  }
-                  @if (selectedCategoryType === 'monthly') {
-                    @for (category of monthlyCategories(); track category.id) {
-                      <option [value]="category.id">{{ category.name }}</option>
-                    }
-                  }
-                  @if (selectedCategoryType === 'cash') {
-                    @for (category of cashCategories(); track category.id) {
-                      <option [value]="category.id">{{ category.name }}</option>
-                    }
-                  }
-                </select>
-                @if (budgetItemForm.get('category_id')?.invalid && budgetItemForm.get('category_id')?.touched) {
-                  <div class="text-red-500 text-sm mt-1">
-                    Category is required
-                  </div>
-                }
-              </div>
-              
-              <!-- Amount -->
-              <div>
-                <label for="amount" class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-                <div class="relative">
-                  <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <span class="text-gray-500 sm:text-sm">$</span>
-                  </div>
-                  <input 
-                    type="number" 
-                    id="amount" 
-                    formControlName="amount"
-                    class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="0.00"
-                    step="0.01"
-                    min="0"
-                  >
-                </div>
-                @if (budgetItemForm.get('amount')?.invalid && budgetItemForm.get('amount')?.touched) {
-                  <div class="text-red-500 text-sm mt-1">
-                    @if (budgetItemForm.get('amount')?.errors?.['required']) {
-                      Amount is required
-                    }
-                    @if (budgetItemForm.get('amount')?.errors?.['min']) {
-                      Amount must be positive
-                    }
-                  </div>
-                }
-              </div>
-              
-              <!-- Submit button -->
-              <div class="pt-2">
-                <button 
-                  type="submit" 
-                  class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                  [disabled]="budgetItemForm.invalid || loading()"
-                >
-                  Add to Budget
-                </button>
-              </div>
-            </form>
           </div>
         </div>
+        <div class="mt-4 flex gap-2">
+          <button type="submit" class="btn btn-primary" [disabled]="budgetItemForm.invalid">
+            @if (editingItemId) {
+              Update Item
+            } @else {
+              Add Item
+            }
+          </button>
+          @if (editingItemId) {
+            <button type="button" class="btn btn-ghost" (click)="resetForm()">Cancel</button>
+          }
+        </div>
+      </form>
+    </div>
+
+    <!-- Budget Item Lists -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Checking Account -->
+      <div>
+        <h3 class="text-2xl font-semibold mb-4 border-b pb-2">Checking Account</h3>
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th class="text-right">Amount</th>
+                <th class="w-24"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of checkingItems(); track item.id) {
+                <tr>
+                  <td>{{ getCategoryName(item.category_id) }}</td>
+                  <td class="text-right">${{ item.amount.toFixed(2) }}</td>
+                  <td class="text-right">
+                    <button (click)="editBudgetItem(item)" class="btn btn-sm btn-ghost mr-1">Edit</button>
+                    <button (click)="deleteBudgetItem(item.id)" class="btn btn-sm btn-error">Delete</button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-center py-4">No items for Checking account.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
+
+      <!-- Savings Account -->
+      <div>
+        <h3 class="text-2xl font-semibold mb-4 border-b pb-2">Savings Account</h3>
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th class="text-right">Amount</th>
+                <th class="w-24"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of savingsItems(); track item.id) {
+                <tr>
+                  <td>{{ getCategoryName(item.category_id) }}</td>
+                  <td class="text-right">${{ item.amount.toFixed(2) }}</td>
+                  <td class="text-right">
+                    <button (click)="editBudgetItem(item)" class="btn btn-sm btn-ghost mr-1">Edit</button>
+                    <button (click)="deleteBudgetItem(item.id)" class="btn btn-sm btn-error">Delete</button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-center py-4">No items for Savings account.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  } @else if (loading()) {
+    <div class="text-center p-8">
+      <span class="loading loading-lg loading-spinner"></span>
+    </div>
+  } @else {
+    <div class="text-center p-8">
+      <p>Budget not found.</p>
     </div>
   }
 </div>

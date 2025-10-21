@@ -16,9 +16,9 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withInterceptors([authInterceptor])),
     provideAnimationsAsync(),
     providePrimeNG({
-      theme: {
-        preset: Aura
-      }
+      // theme: {
+      //   preset: Aura
+      // }
     }),
     // Initialize services
     ...serviceInitializerProviders
