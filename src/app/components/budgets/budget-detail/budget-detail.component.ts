@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, computed } from '@angular/core';
+import { Component, OnInit, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -8,11 +8,12 @@ import { BudgetService, Budget, BudgetItem } from '../../../services/budget.serv
 import { CategoryService, Category } from '../../../services/category.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { ButtonModule } from 'primeng/button';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-budget-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, ButtonModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, ButtonModule, TooltipModule],
   templateUrl: './budget-detail.component.html',
   styleUrls: ['./budget-detail.component.scss']
 })
@@ -37,6 +38,19 @@ export class BudgetDetailComponent implements OnInit {
   budget: Budget | null = null;
   budgetItemForm!: FormGroup;
   editingItemId: number | null = null;
+  activeTabIndex = signal(0); // Track active tab (0: Cash, 1: Monthly, 2: Savings, 3: Income)
+  searchTerm = signal(''); // Search term for filtering items
+  
+  // Tab configuration
+  tabs = [
+    { label: 'Cash', categoryType: 'cash', color: 'text-orange-600' },
+    { label: 'Monthly', categoryType: 'monthly', color: 'text-blue-600' },
+    { label: 'Savings', categoryType: 'savings', color: 'text-purple-600' },
+    { label: 'Income', categoryType: 'income', color: 'text-green-600' }
+  ];
+  
+  // Current active category type based on tab
+  activeCategoryType = computed(() => this.tabs[this.activeTabIndex()].categoryType);
   
   // Computed signals for grouping budget items by category type
   incomeItems = computed(() =>
@@ -94,11 +108,18 @@ export class BudgetDetailComponent implements OnInit {
   initBudgetItemForm(item?: BudgetItem): void {
     this.budgetItemForm = this.formBuilder.group({
       category_id: [item?.category_id || null, Validators.required],
-      amount: [item?.amount || null, [Validators.required, Validators.min(0.01)]],
-      category_type: [item?.category_type || 'monthly', Validators.required]
+      amount: [item?.amount || null, [Validators.required, Validators.min(0.01)]]
     });
     
     this.editingItemId = item?.id || null;
+    
+    // If editing an item, switch to the appropriate tab
+    if (item) {
+      const tabIndex = this.tabs.findIndex(tab => tab.categoryType === item.category_type);
+      if (tabIndex !== -1) {
+        this.activeTabIndex.set(tabIndex);
+      }
+    }
   }
 
   onSubmit(): void {
@@ -109,9 +130,15 @@ export class BudgetDetailComponent implements OnInit {
     const budgetId = this.budget?.id;
     if (!budgetId) return;
     
+    // Add the category type based on active tab
+    const formData = {
+      ...this.budgetItemForm.value,
+      category_type: this.activeCategoryType()
+    };
+    
     if (this.editingItemId) {
       // Update existing item
-      this.http.put(`${this.budgetService['apiUrl']}/${budgetId}/items/${this.editingItemId}`, this.budgetItemForm.value)
+      this.http.put(`${this.budgetService['apiUrl']}/${budgetId}/items/${this.editingItemId}`, formData)
         .subscribe({
           next: (updatedItem: any) => {
             // Update the local state
@@ -124,7 +151,7 @@ export class BudgetDetailComponent implements OnInit {
         });
     } else {
       // Create new item
-      this.budgetService.createBudgetItem(this.budgetItemForm.value).subscribe({
+      this.budgetService.createBudgetItem(formData).subscribe({
         next: () => {
           this.resetForm();
         },
@@ -138,10 +165,36 @@ export class BudgetDetailComponent implements OnInit {
   resetForm(): void {
     this.budgetItemForm.reset({
       category_id: null,
-      amount: null,
-      category_type: 'monthly'
+      amount: null
     });
     this.editingItemId = null;
+  }
+  
+  onTabChange(event: any): void {
+    this.activeTabIndex.set(event.index);
+    // Reset form when switching tabs (unless editing)
+    if (!this.editingItemId) {
+      this.resetForm();
+    }
+  }
+  
+  getItemsForTab(categoryType: string) {
+    const items = this.budgetItems().filter(item => item.category_type === categoryType);
+    const search = this.searchTerm().toLowerCase();
+    
+    if (!search) {
+      return items;
+    }
+    
+    return items.filter(item => {
+      const categoryName = this.getCategoryName(item.category_id).toLowerCase();
+      return categoryName.includes(search) || item.amount.toString().includes(search);
+    });
+  }
+  
+  onSearchChange(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchTerm.set(target.value);
   }
 
   getCategoryName(categoryId: number): string {

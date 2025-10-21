@@ -12,22 +12,22 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
           </svg>
           @if (editingItemId) {
-            Edit Budget Item
+            Edit {{ tabs[activeTabIndex()].label }} Item
           } @else {
-            Add New Budget Item
+            Add New {{ tabs[activeTabIndex()].label }} Item
           }
         </h3>
         <p class="text-sm text-base-content/70 mt-2 leading-relaxed">
           @if (editingItemId) {
-            Update the details for this budget item
+            Update the details for this {{ tabs[activeTabIndex()].label.toLowerCase() }} budget item
           } @else {
-            Create a new budget item by selecting a category, entering an amount, and choosing an account
+            Create a new {{ tabs[activeTabIndex()].label.toLowerCase() }} budget item by selecting a category and entering an amount
           }
         </p>
       </div>
       
       <form [formGroup]="budgetItemForm" (ngSubmit)="onSubmit()">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <!-- Category Dropdown -->
           <div class="form-control space-y-2">
             <label class="label pb-1">
@@ -70,40 +70,7 @@
                 class="input input-bordered w-full pl-8 focus:input-primary transition-colors duration-200" />
             </div>
             <div class="label py-1">
-              <span class="label-text-alt text-xs text-base-content/60">Enter the budget amount</span>
-            </div>
-          </div>
-
-          <!-- Category Type Radio -->
-          <div class="form-control space-y-2">
-            <label class="label pb-1">
-              <span class="label-text font-semibold text-base text-base-content flex items-center gap-2">
-                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                </svg>
-                Category Type
-              </span>
-            </label>
-            <div class="grid grid-cols-2 gap-3">
-              <label class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-colors duration-200">
-                <input type="radio" formControlName="category_type" value="income" class="radio radio-primary" />
-                <span class="ml-3 text-base font-medium">Income</span>
-              </label>
-              <label class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-colors duration-200">
-                <input type="radio" formControlName="category_type" value="monthly" class="radio radio-primary" />
-                <span class="ml-3 text-base font-medium">Monthly</span>
-              </label>
-              <label class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-colors duration-200">
-                <input type="radio" formControlName="category_type" value="savings" class="radio radio-primary" />
-                <span class="ml-3 text-base font-medium">Savings</span>
-              </label>
-              <label class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-colors duration-200">
-                <input type="radio" formControlName="category_type" value="cash" class="radio radio-primary" />
-                <span class="ml-3 text-base font-medium">Cash</span>
-              </label>
-            </div>
-            <div class="label py-1">
-              <span class="label-text-alt text-xs text-base-content/60">Select the type of budget category</span>
+              <span class="label-text-alt text-xs text-base-content/60">Enter the budget amount for {{ tabs[activeTabIndex()].label.toLowerCase() }}</span>
             </div>
           </div>
         </div>
@@ -126,129 +93,95 @@
       </form>
     </div>
 
-    <!-- Budget Item Lists by Category Type -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Income -->
-      <div>
-        <h3 class="text-2xl font-semibold mb-4 border-b pb-2 text-green-600">Income</h3>
-        <div class="overflow-x-auto">
-          <table class="table w-full">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th class="text-right">Amount</th>
-                <th class="w-24"></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of incomeItems(); track item.id) {
-                <tr>
-                  <td>{{ getCategoryName(item.category_id) }}</td>
-                  <td class="text-right text-green-600">₪{{ item.amount.toFixed(2) }}</td>
-                  <td class="text-right">
-                    <p-button (click)="editBudgetItem(item)" icon="pi pi-pencil" styleClass="p-button-sm p-button-ghost mr-1"></p-button>
-                    <p-button (click)="deleteBudgetItem(item.id)" icon="pi pi-trash" styleClass="p-button-sm p-button-danger"></p-button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="3" class="text-center py-4">No income items.</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
+    <!-- Custom Tabbed Budget Items -->
+    <div class="bg-base-100 rounded-xl shadow-lg">
+      <!-- Tab Headers -->
+      <div class="border-b border-base-300">
+        <nav class="flex space-x-8 px-6" aria-label="Tabs">
+          @for (tab of tabs; track tab.categoryType; let i = $index) {
+            <button
+              (click)="onTabChange({index: i})"
+              [class]="activeTabIndex() === i
+                ? 'border-primary text-primary py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap'
+                : 'border-transparent text-base-content/70 hover:text-base-content hover:border-base-300 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200'"
+              [attr.aria-current]="activeTabIndex() === i ? 'page' : null">
+              {{ tab.label }}
+            </button>
+          }
+        </nav>
       </div>
 
-      <!-- Monthly Expenses -->
-      <div>
-        <h3 class="text-2xl font-semibold mb-4 border-b pb-2 text-blue-600">Monthly Expenses</h3>
-        <div class="overflow-x-auto">
-          <table class="table w-full">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th class="text-right">Amount</th>
-                <th class="w-24"></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of monthlyItems(); track item.id) {
-                <tr>
-                  <td>{{ getCategoryName(item.category_id) }}</td>
-                  <td class="text-right">₪{{ item.amount.toFixed(2) }}</td>
-                  <td class="text-right">
-                    <p-button (click)="editBudgetItem(item)" icon="pi pi-pencil" styleClass="p-button-sm p-button-ghost mr-1"></p-button>
-                    <p-button (click)="deleteBudgetItem(item.id)" icon="pi pi-trash" styleClass="p-button-sm p-button-danger"></p-button>
-                  </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="3" class="text-center py-4">No monthly expense items.</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+      <!-- Tab Content -->
+      <div class="p-6">
+        <!-- Search Input -->
+        <div class="mb-4">
+          <div class="form-control w-full max-w-md">
+            <label class="label pb-1">
+              <span class="label-text font-semibold text-base text-base-content flex items-center gap-2">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                Search {{ tabs[activeTabIndex()].label }}
+              </span>
+            </label>
+            <input
+              type="text"
+              placeholder="Search by category name or amount..."
+              class="input input-bordered w-full focus:input-primary transition-colors duration-200"
+              (input)="onSearchChange($event)"
+              [value]="searchTerm()" />
+            <div class="label py-1">
+              <span class="label-text-alt text-xs text-base-content/60">Filter items by category name or amount</span>
+            </div>
+          </div>
         </div>
-      </div>
-
-      <!-- Savings Allocations -->
-      <div>
-        <h3 class="text-2xl font-semibold mb-4 border-b pb-2 text-purple-600">Savings Allocations</h3>
+        
         <div class="overflow-x-auto">
           <table class="table w-full">
             <thead>
               <tr>
-                <th>Category</th>
+                <th class="text-left">Category</th>
                 <th class="text-right">Amount</th>
                 <th class="w-24"></th>
               </tr>
             </thead>
             <tbody>
-              @for (item of savingsItems(); track item.id) {
+              @for (item of getItemsForTab(tabs[activeTabIndex()].categoryType); track item.id) {
                 <tr>
                   <td>{{ getCategoryName(item.category_id) }}</td>
-                  <td class="text-right">₪{{ item.amount.toFixed(2) }}</td>
+                  <td class="text-right" [ngClass]="tabs[activeTabIndex()].color">₪{{ item.amount.toFixed(2) }}</td>
                   <td class="text-right">
-                    <p-button (click)="editBudgetItem(item)" icon="pi pi-pencil" styleClass="p-button-sm p-button-ghost mr-1"></p-button>
-                    <p-button (click)="deleteBudgetItem(item.id)" icon="pi pi-trash" styleClass="p-button-sm p-button-danger"></p-button>
+                    <p-button
+                      (click)="editBudgetItem(item)"
+                      styleClass="p-button-sm p-button-ghost mr-1"
+                      pTooltip="Edit item"
+                      tooltipPosition="top">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </p-button>
+                    <p-button
+                      (click)="deleteBudgetItem(item.id)"
+                      styleClass="p-button-sm p-button-danger"
+                      pTooltip="Delete item"
+                      tooltipPosition="top">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                      </svg>
+                    </p-button>
                   </td>
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="3" class="text-center py-4">No savings allocation items.</td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Cash Expenses -->
-      <div>
-        <h3 class="text-2xl font-semibold mb-4 border-b pb-2 text-orange-600">Cash Expenses</h3>
-        <div class="overflow-x-auto">
-          <table class="table w-full">
-            <thead>
-              <tr>
-                <th>Category</th>
-                <th class="text-right">Amount</th>
-                <th class="w-24"></th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of cashItems(); track item.id) {
-                <tr>
-                  <td>{{ getCategoryName(item.category_id) }}</td>
-                  <td class="text-right">₪{{ item.amount.toFixed(2) }}</td>
-                  <td class="text-right">
-                    <p-button (click)="editBudgetItem(item)" icon="pi pi-pencil" styleClass="p-button-sm p-button-ghost mr-1"></p-button>
-                    <p-button (click)="deleteBudgetItem(item.id)" icon="pi pi-trash" styleClass="p-button-sm p-button-danger"></p-button>
+                  <td colspan="3" class="text-center py-8">
+                    <div class="flex flex-col items-center gap-2">
+                      <svg class="w-12 h-12 text-base-content/30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                      </svg>
+                      <p class="text-base-content/60">No {{ tabs[activeTabIndex()].label.toLowerCase() }} items yet.</p>
+                      <p class="text-sm text-base-content/40">Add your first {{ tabs[activeTabIndex()].label.toLowerCase() }} item using the form above.</p>
+                    </div>
                   </td>
-                </tr>
-              } @empty {
-                <tr>
-                  <td colspan="3" class="text-center py-4">No cash expense items.</td>
                 </tr>
               }
             </tbody>
