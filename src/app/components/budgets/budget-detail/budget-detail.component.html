@@ -5,55 +5,110 @@
     </div>
 
     <!-- Add Budget Item Form -->
-    <div class="mb-8 p-4 border rounded-lg shadow-sm bg-base-100">
-      <h3 class="text-xl font-semibold mb-4">
-        @if (editingItemId) {
-          Edit Budget Item
-        } @else {
-          Add New Budget Item
-        }
-      </h3>
+    <div class="mb-8 p-6 border border-base-300 rounded-xl shadow-lg bg-base-100 hover:shadow-xl transition-shadow duration-200">
+      <div class="mb-6 pb-4 border-b border-base-300">
+        <h3 class="text-2xl font-bold text-base-content flex items-center gap-2">
+          <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+          @if (editingItemId) {
+            Edit Budget Item
+          } @else {
+            Add New Budget Item
+          }
+        </h3>
+        <p class="text-sm text-base-content/70 mt-2 leading-relaxed">
+          @if (editingItemId) {
+            Update the details for this budget item
+          } @else {
+            Create a new budget item by selecting a category, entering an amount, and choosing an account
+          }
+        </p>
+      </div>
+      
       <form [formGroup]="budgetItemForm" (ngSubmit)="onSubmit()">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <!-- Category Dropdown -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Category</span>
+          <div class="form-control space-y-2">
+            <label class="label pb-1">
+              <span class="label-text font-semibold text-base text-base-content flex items-center gap-2">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                Category
+              </span>
             </label>
-            <select formControlName="category_id" class="select select-bordered">
+            <select formControlName="category_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200">
               <option [ngValue]="null" disabled>Select a category</option>
               @for (category of categories(); track category.id) {
                 <option [value]="category.id">{{ category.name }}</option>
               }
             </select>
+            <div class="label py-1">
+              <span class="label-text-alt text-xs text-base-content/60">Choose the budget category for this item</span>
+            </div>
           </div>
 
           <!-- Amount Input -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Amount</span>
+          <div class="form-control space-y-2">
+            <label class="label pb-1">
+              <span class="label-text font-semibold text-base text-base-content flex items-center gap-2">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"></path>
+                </svg>
+                Amount
+              </span>
             </label>
-            <input type="number" formControlName="amount" placeholder="0.00" class="input input-bordered" />
+            <div class="relative">
+              <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-base-content/70 font-medium pointer-events-none z-10">₪</span>
+              <input
+                type="number"
+                formControlName="amount"
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                class="input input-bordered w-full pl-8 focus:input-primary transition-colors duration-200" />
+            </div>
+            <div class="label py-1">
+              <span class="label-text-alt text-xs text-base-content/60">Enter the budget amount</span>
+            </div>
           </div>
 
-          <!-- Account Type Radio -->
-          <div class="form-control">
-            <label class="label">
-              <span class="label-text">Account</span>
+          <!-- Category Type Radio -->
+          <div class="form-control space-y-2">
+            <label class="label pb-1">
+              <span class="label-text font-semibold text-base text-base-content flex items-center gap-2">
+                <svg class="w-4 h-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                </svg>
+                Category Type
+              </span>
             </label>
-            <div class="flex gap-4">
-              <label class="flex items-center">
-                <input type="radio" formControlName="account_type" value="checking" class="radio radio-primary" />
-                <span class="ml-2">Checking</span>
+            <div class="grid grid-cols-2 gap-3">
+              <label class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-colors duration-200">
+                <input type="radio" formControlName="category_type" value="income" class="radio radio-primary" />
+                <span class="ml-3 text-base font-medium">Income</span>
               </label>
-              <label class="flex items-center">
-                <input type="radio" formControlName="account_type" value="savings" class="radio radio-primary" />
-                <span class="ml-2">Savings</span>
+              <label class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-colors duration-200">
+                <input type="radio" formControlName="category_type" value="monthly" class="radio radio-primary" />
+                <span class="ml-3 text-base font-medium">Monthly</span>
               </label>
+              <label class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-colors duration-200">
+                <input type="radio" formControlName="category_type" value="savings" class="radio radio-primary" />
+                <span class="ml-3 text-base font-medium">Savings</span>
+              </label>
+              <label class="flex items-center cursor-pointer hover:bg-base-200 p-2 rounded-lg transition-colors duration-200">
+                <input type="radio" formControlName="category_type" value="cash" class="radio radio-primary" />
+                <span class="ml-3 text-base font-medium">Cash</span>
+              </label>
+            </div>
+            <div class="label py-1">
+              <span class="label-text-alt text-xs text-base-content/60">Select the type of budget category</span>
             </div>
           </div>
         </div>
-        <div class="mt-4 flex gap-2">
+        
+        <div class="mt-8 pt-6 border-t border-base-300 flex flex-col sm:flex-row gap-3">
           <p-button
             type="submit"
             [label]="editingItemId ? 'Update Item' : 'Add Item'"
@@ -71,11 +126,11 @@
       </form>
     </div>
 
-    <!-- Budget Item Lists -->
+    <!-- Budget Item Lists by Category Type -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <!-- Checking Account -->
+      <!-- Income -->
       <div>
-        <h3 class="text-2xl font-semibold mb-4 border-b pb-2">Checking Account</h3>
+        <h3 class="text-2xl font-semibold mb-4 border-b pb-2 text-green-600">Income</h3>
         <div class="overflow-x-auto">
           <table class="table w-full">
             <thead>
@@ -86,10 +141,10 @@
               </tr>
             </thead>
             <tbody>
-              @for (item of checkingItems(); track item.id) {
+              @for (item of incomeItems(); track item.id) {
                 <tr>
                   <td>{{ getCategoryName(item.category_id) }}</td>
-                  <td class="text-right">${{ item.amount.toFixed(2) }}</td>
+                  <td class="text-right text-green-600">₪{{ item.amount.toFixed(2) }}</td>
                   <td class="text-right">
                     <p-button (click)="editBudgetItem(item)" icon="pi pi-pencil" styleClass="p-button-sm p-button-ghost mr-1"></p-button>
                     <p-button (click)="deleteBudgetItem(item.id)" icon="pi pi-trash" styleClass="p-button-sm p-button-danger"></p-button>
@@ -97,7 +152,7 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="3" class="text-center py-4">No items for Checking account.</td>
+                  <td colspan="3" class="text-center py-4">No income items.</td>
                 </tr>
               }
             </tbody>
@@ -105,9 +160,41 @@
         </div>
       </div>
 
-      <!-- Savings Account -->
+      <!-- Monthly Expenses -->
       <div>
-        <h3 class="text-2xl font-semibold mb-4 border-b pb-2">Savings Account</h3>
+        <h3 class="text-2xl font-semibold mb-4 border-b pb-2 text-blue-600">Monthly Expenses</h3>
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th class="text-right">Amount</th>
+                <th class="w-24"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of monthlyItems(); track item.id) {
+                <tr>
+                  <td>{{ getCategoryName(item.category_id) }}</td>
+                  <td class="text-right">₪{{ item.amount.toFixed(2) }}</td>
+                  <td class="text-right">
+                    <p-button (click)="editBudgetItem(item)" icon="pi pi-pencil" styleClass="p-button-sm p-button-ghost mr-1"></p-button>
+                    <p-button (click)="deleteBudgetItem(item.id)" icon="pi pi-trash" styleClass="p-button-sm p-button-danger"></p-button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-center py-4">No monthly expense items.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Savings Allocations -->
+      <div>
+        <h3 class="text-2xl font-semibold mb-4 border-b pb-2 text-purple-600">Savings Allocations</h3>
         <div class="overflow-x-auto">
           <table class="table w-full">
             <thead>
@@ -121,7 +208,7 @@
               @for (item of savingsItems(); track item.id) {
                 <tr>
                   <td>{{ getCategoryName(item.category_id) }}</td>
-                  <td class="text-right">${{ item.amount.toFixed(2) }}</td>
+                  <td class="text-right">₪{{ item.amount.toFixed(2) }}</td>
                   <td class="text-right">
                     <p-button (click)="editBudgetItem(item)" icon="pi pi-pencil" styleClass="p-button-sm p-button-ghost mr-1"></p-button>
                     <p-button (click)="deleteBudgetItem(item.id)" icon="pi pi-trash" styleClass="p-button-sm p-button-danger"></p-button>
@@ -129,7 +216,39 @@
                 </tr>
               } @empty {
                 <tr>
-                  <td colspan="3" class="text-center py-4">No items for Savings account.</td>
+                  <td colspan="3" class="text-center py-4">No savings allocation items.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Cash Expenses -->
+      <div>
+        <h3 class="text-2xl font-semibold mb-4 border-b pb-2 text-orange-600">Cash Expenses</h3>
+        <div class="overflow-x-auto">
+          <table class="table w-full">
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th class="text-right">Amount</th>
+                <th class="w-24"></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of cashItems(); track item.id) {
+                <tr>
+                  <td>{{ getCategoryName(item.category_id) }}</td>
+                  <td class="text-right">₪{{ item.amount.toFixed(2) }}</td>
+                  <td class="text-right">
+                    <p-button (click)="editBudgetItem(item)" icon="pi pi-pencil" styleClass="p-button-sm p-button-ghost mr-1"></p-button>
+                    <p-button (click)="deleteBudgetItem(item.id)" icon="pi pi-trash" styleClass="p-button-sm p-button-danger"></p-button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" class="text-center py-4">No cash expense items.</td>
                 </tr>
               }
             </tbody>

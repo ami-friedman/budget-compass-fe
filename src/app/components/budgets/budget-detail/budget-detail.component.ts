@@ -38,13 +38,21 @@ export class BudgetDetailComponent implements OnInit {
   budgetItemForm!: FormGroup;
   editingItemId: number | null = null;
   
-  // Computed signals for grouping budget items
-  checkingItems = computed(() =>
-    this.budgetItems().filter(item => item.account_type === 'checking')
+  // Computed signals for grouping budget items by category type
+  incomeItems = computed(() =>
+    this.budgetItems().filter(item => item.category_type === 'income')
+  );
+  
+  monthlyItems = computed(() =>
+    this.budgetItems().filter(item => item.category_type === 'monthly')
   );
   
   savingsItems = computed(() =>
-    this.budgetItems().filter(item => item.account_type === 'savings')
+    this.budgetItems().filter(item => item.category_type === 'savings')
+  );
+  
+  cashItems = computed(() =>
+    this.budgetItems().filter(item => item.category_type === 'cash')
   );
   
   ngOnInit(): void {
@@ -87,7 +95,7 @@ export class BudgetDetailComponent implements OnInit {
     this.budgetItemForm = this.formBuilder.group({
       category_id: [item?.category_id || null, Validators.required],
       amount: [item?.amount || null, [Validators.required, Validators.min(0.01)]],
-      account_type: [item?.account_type || 'checking', Validators.required]
+      category_type: [item?.category_type || 'monthly', Validators.required]
     });
     
     this.editingItemId = item?.id || null;
@@ -131,7 +139,7 @@ export class BudgetDetailComponent implements OnInit {
     this.budgetItemForm.reset({
       category_id: null,
       amount: null,
-      account_type: 'checking'
+      category_type: 'monthly'
     });
     this.editingItemId = null;
   }

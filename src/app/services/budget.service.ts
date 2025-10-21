@@ -24,7 +24,7 @@ export interface BudgetCreate {
 export interface BudgetItem {
   id: number;
   amount: number;
-  account_type: 'checking' | 'savings';
+  category_type: 'income' | 'monthly' | 'savings' | 'cash';
   budget_id: number;
   category_id: number;
   is_active: boolean;
@@ -32,7 +32,7 @@ export interface BudgetItem {
 
 export interface BudgetItemCreate {
   amount: number;
-  account_type: 'checking' | 'savings';
+  category_type: 'income' | 'monthly' | 'savings' | 'cash';
   category_id: number;
 }
 
@@ -166,9 +166,11 @@ export class BudgetService {
       tap(newItem => {
         // Update the budget items list
         this.budgetItemsSignal.update(items => {
-          // Check if this item already exists (same category in the budget)
-          const existingIndex = items.findIndex(i => 
-            i.budget_id === newItem.budget_id && i.category_id === newItem.category_id
+          // Check if this item already exists (same category and category type in the budget)
+          const existingIndex = items.findIndex(i =>
+            i.budget_id === newItem.budget_id &&
+            i.category_id === newItem.category_id &&
+            i.category_type === newItem.category_type
           );
           
           if (existingIndex >= 0) {
