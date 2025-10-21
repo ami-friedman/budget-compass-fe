@@ -37,15 +37,15 @@ export const routes: Routes = [
           },
           {
             path: 'current',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          },
-          {
-            path: 'history',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+            loadComponent: () => import('./components/budgets/budget-selector/budget-selector.component').then(m => m.BudgetSelectorComponent)
           },
           {
             path: 'create',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
+            loadComponent: () => import('./components/budgets/create-budget/create-budget.component').then(m => m.CreateBudgetComponent)
+          },
+          {
+            path: ':id',
+            loadComponent: () => import('./components/budgets/budget-detail/budget-detail.component').then(m => m.BudgetDetailComponent)
           },
           {
             path: 'categories',
@@ -150,7 +150,7 @@ export const routes: Routes = [
   // Fallback routes
   {
     path: '',
-    redirectTo: 'login',
+    redirectTo: 'dashboard',
     pathMatch: 'full'
   },
   {

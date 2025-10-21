@@ -49,9 +49,7 @@ export class NavigationService {
     switch (section) {
       case 'budgets':
         this.secondaryNavItemsSignal.set([
-          { label: 'Current Month', route: '/budgets/current' },
-          { label: 'Previous Months', route: '/budgets/history' },
-          { label: 'Create New', route: '/budgets/create' },
+          { label: 'Budget', route: '/budgets/current' },
           { label: 'Categories', route: '/budgets/categories' }
         ]);
         this.showSecondaryNavSignal.set(true);

@@ -63,7 +63,8 @@ export class BudgetItemComponent {
 
 ### 3. New Control Flow Syntax
 
-- Use the new control flow syntax (`@if`, `@for`, etc.) instead of structural directives
+- **Strictly use the new built-in control flow syntax (`@if`, `@for`, `@switch`).**
+- **The use of structural directives like `*ngIf`, `*ngFor`, and `ngSwitch` is forbidden.**
 - Follow these patterns:
 
 ```html
@@ -82,21 +83,44 @@ export class BudgetItemComponent {
 }
 ```
 
-### 4. Input Handling
+### 4. Component Inputs and Outputs
 
-- Use required inputs when a component needs certain data to function
-- Use input signals for reactive input handling
+#### Inputs
+- **Always use the `input()` function for declaring component inputs.** The `@Input()` decorator is forbidden.
+- Use `input.required<T>()` for mandatory inputs.
 
 ```typescript
+import { Component, input } from '@angular/core';
+
 @Component({
   // ...
 })
 export class BudgetCategoryComponent {
-  @Input({ required: true }) category!: Category;
-  
-  // Or with input signals
+  // Required input
   category = input.required<Category>();
+  
+  // Optional input with a default value
   description = input<string>('Default description');
+}
+```
+
+#### Outputs
+- **Always use the `output()` function for declaring component outputs.**
+- **The `@Output()` decorator and `EventEmitter` are forbidden.**
+
+```typescript
+import { Component, output } from '@angular/core';
+import { BudgetItem } from '../models/budget.model';
+
+@Component({
+  // ...
+})
+export class BudgetItemComponent {
+  itemSelected = output<BudgetItem>();
+
+  onSelect(item: BudgetItem) {
+    this.itemSelected.emit(item);
+  }
 }
 ```
 
