@@ -390,14 +390,9 @@ export class TransactionsComponent {
 
   getAccountTransactions() {
     const accountType = this.activeAccountType();
-    const transactions = accountType === 'checking'
+    return accountType === 'checking'
       ? this.transactionService.checkingTransactions()
       : this.transactionService.savingsTransactions();
-    
-    // Debug logging to help troubleshoot
-    console.log(`Component getAccountTransactions() - ${accountType}:`, transactions.length, 'transactions');
-    
-    return transactions;
   }
 
   getAccountTotal() {

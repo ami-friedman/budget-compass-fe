@@ -174,18 +174,10 @@ export class TransactionService {
       ).toPromise();
 
       if (newTransaction) {
-        // Debug logging
-        console.log('New transaction created:', newTransaction);
-        console.log('Current transactions before update:', this.transactionsSignal().length);
-        
         // Add to current transactions with explicit signal update
         const currentTransactions = this.transactionsSignal();
         const updatedTransactions = [...currentTransactions, newTransaction];
         this.transactionsSignal.set(updatedTransactions);
-        
-        console.log('Current transactions after update:', this.transactionsSignal().length);
-        console.log('Checking transactions:', this.checkingTransactions().length);
-        console.log('Savings transactions:', this.savingsTransactions().length);
         
         return newTransaction;
       }
