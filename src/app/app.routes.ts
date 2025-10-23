@@ -23,11 +23,6 @@ export const routes: Routes = [
         loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
-        path: 'test-navigation',
-        loadComponent: () => import('./components/test/navigation-test.component').then(m => m.NavigationTestComponent)
-      },
-      // Placeholder routes for future implementation
-      {
         path: 'budgets',
         children: [
           {
@@ -57,79 +52,7 @@ export const routes: Routes = [
             path: 'all',
             loadComponent: () => import('./components/transactions/transactions.component').then(m => m.TransactionsComponent)
           },
-          {
-            path: 'new',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          },
-          {
-            path: 'recurring',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          },
-          {
-            path: 'import',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          }
         ]
-      },
-      {
-        path: 'accounts',
-        children: [
-          {
-            path: '',
-            redirectTo: 'checking',
-            pathMatch: 'full'
-          },
-          {
-            path: 'checking',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          },
-          {
-            path: 'savings',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          },
-          {
-            path: 'transfer',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          },
-          {
-            path: 'settings',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          }
-        ]
-      },
-      {
-        path: 'reports',
-        children: [
-          {
-            path: '',
-            redirectTo: 'monthly',
-            pathMatch: 'full'
-          },
-          {
-            path: 'monthly',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          },
-          {
-            path: 'categories',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          },
-          {
-            path: 'trends',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          },
-          {
-            path: 'income-expenses',
-            loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-          }
-        ]
-      },
-      {
-        path: 'settings',
-        loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
-      },
-      {
-        path: 'profile',
-        loadComponent: () => import('./components/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
         path: '',

@@ -57,30 +57,7 @@ export class NavigationService {
         
       case 'transactions':
         this.secondaryNavItemsSignal.set([
-          { label: 'Add New', route: '/transactions/new' },
-          { label: 'All Transactions', route: '/transactions/all' },
-          { label: 'Recurring', route: '/transactions/recurring' },
-          { label: 'Import', route: '/transactions/import' }
-        ]);
-        this.showSecondaryNavSignal.set(true);
-        break;
-        
-      case 'accounts':
-        this.secondaryNavItemsSignal.set([
-          { label: 'Checking', route: '/accounts/checking' },
-          { label: 'Savings', route: '/accounts/savings' },
-          { label: 'Transfer', route: '/accounts/transfer' },
-          { label: 'Account Settings', route: '/accounts/settings' }
-        ]);
-        this.showSecondaryNavSignal.set(true);
-        break;
-        
-      case 'reports':
-        this.secondaryNavItemsSignal.set([
-          { label: 'Monthly Overview', route: '/reports/monthly' },
-          { label: 'Category Analysis', route: '/reports/categories' },
-          { label: 'Spending Trends', route: '/reports/trends' },
-          { label: 'Income vs Expenses', route: '/reports/income-expenses' }
+          { label: 'All Transactions', route: '/transactions/all' }
         ]);
         this.showSecondaryNavSignal.set(true);
         break;
