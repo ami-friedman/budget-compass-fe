@@ -2,12 +2,13 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
 import { BudgetService, BudgetCreate } from '../../../services/budget.service';
 
 @Component({
   selector: 'app-budget-selector',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ButtonModule],
   template: `
     <div class="p-4 bg-white rounded-lg shadow-md">
       <h2 class="text-xl font-semibold mb-4">Select Budget</h2>
@@ -21,7 +22,9 @@ import { BudgetService, BudgetCreate } from '../../../services/budget.service';
               formControlName="month" 
               class="w-full p-2 border rounded-md"
               (change)="checkBudgetExists()">
-              <option *ngFor="let month of months" [value]="month.value">{{ month.name }}</option>
+              @for (month of months; track month.value) {
+                <option [value]="month.value">{{ month.name }}</option>
+              }
             </select>
           </div>
           
@@ -32,28 +35,28 @@ import { BudgetService, BudgetCreate } from '../../../services/budget.service';
               formControlName="year" 
               class="w-full p-2 border rounded-md"
               (change)="checkBudgetExists()">
-              <option *ngFor="let year of years" [value]="year">{{ year }}</option>
+              @for (year of years; track year) {
+                <option [value]="year">{{ year }}</option>
+              }
             </select>
           </div>
         </div>
         
         <div class="flex justify-between items-center mt-4">
-          <button 
-            type="submit" 
-            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            [disabled]="loading()">
-            {{ budgetExists ? 'View Budget' : 'Create New Budget' }}
-          </button>
-          
-          <div *ngIf="loading()" class="text-sm text-gray-500">
-            Loading...
-          </div>
+          <p-button
+            type="submit"
+            [label]="budgetExists ? 'View Budget' : 'Create New Budget'"
+            [disabled]="loading()"
+            [loading]="loading()"
+          ></p-button>
         </div>
       </form>
       
-      <div *ngIf="error()" class="mt-4 p-2 bg-red-100 text-red-700 rounded-md">
-        {{ error() }}
-      </div>
+      @if (error()) {
+        <div class="mt-4 p-2 bg-red-100 text-red-700 rounded-md">
+          {{ error() }}
+        </div>
+      }
     </div>
   `,
   styles: [`
