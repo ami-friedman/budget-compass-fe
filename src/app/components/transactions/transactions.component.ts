@@ -119,14 +119,14 @@ interface BudgetItemOption {
                   </span>
                 </label>
                 @if (activeAccountType() === 'checking') {
-                  <select formControlName="budget_item_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200">
+                  <select formControlName="budget_item_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200 cursor-pointer">
                     <option [ngValue]="null" disabled>Select a budget category</option>
                     @for (option of budgetItemOptions(); track option.value) {
                       <option [value]="option.value">{{ option.label }}</option>
                     }
                   </select>
                 } @else {
-                  <select formControlName="category_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200">
+                  <select formControlName="category_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200 cursor-pointer">
                     @if (budgetItemOptions().length === 0) {
                       <option [ngValue]="null" disabled>No funded savings categories yet</option>
                     } @else {
@@ -227,8 +227,8 @@ interface BudgetItemOption {
                 <button
                   (click)="onTabChange({index: i})"
                   [class]="activeTabIndex() === i
-                    ? 'border-primary text-primary py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap'
-                    : 'border-transparent text-base-content/70 hover:text-base-content hover:border-base-300 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200'"
+                    ? 'border-primary text-primary py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap cursor-pointer'
+                    : 'border-transparent text-base-content/70 hover:text-base-content hover:border-base-300 py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap transition-colors duration-200 cursor-pointer'"
                   [attr.aria-current]="activeTabIndex() === i ? 'page' : null">
                   {{ tab.label }}
                 </button>

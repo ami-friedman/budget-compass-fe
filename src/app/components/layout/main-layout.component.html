@@ -10,9 +10,9 @@
         
         <!-- Desktop Navigation -->
         <nav class="hidden md:flex space-x-4 items-center">
-          <a routerLink="/dashboard" routerLinkActive="text-blue-600 font-medium" class="px-3 py-2 text-gray-700 hover:text-blue-600">Dashboard</a>
-          <a routerLink="/budgets/current" routerLinkActive="text-blue-600 font-medium" class="px-3 py-2 text-gray-700 hover:text-blue-600">Budgets</a>
-          <a routerLink="/transactions" routerLinkActive="text-blue-600 font-medium" class="px-3 py-2 text-gray-700 hover:text-blue-600">Transactions</a>
+          <a routerLink="/dashboard" routerLinkActive="text-blue-600 font-medium" class="px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">Dashboard</a>
+          <a routerLink="/budgets/current" routerLinkActive="text-blue-600 font-medium" class="px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">Budgets</a>
+          <a routerLink="/transactions" routerLinkActive="text-blue-600 font-medium" class="px-3 py-2 text-gray-700 hover:text-blue-600 cursor-pointer">Transactions</a>
           
           <!-- User dropdown -->
           <div class="relative ml-3">
@@ -47,9 +47,9 @@
     <!-- Mobile navigation menu -->
     <div [class.hidden]="!isMobileMenuOpen()">
       <div class="px-2 pt-2 pb-3 space-y-1">
-        <a routerLink="/dashboard" routerLinkActive="bg-blue-50 text-blue-600" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600">Dashboard</a>
-        <a routerLink="/budgets/current" routerLinkActive="bg-blue-50 text-blue-600" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600">Budgets</a>
-        <a routerLink="/transactions" routerLinkActive="bg-blue-50 text-blue-600" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600">Transactions</a>
+        <a routerLink="/dashboard" routerLinkActive="bg-blue-50 text-blue-600" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer">Dashboard</a>
+        <a routerLink="/budgets/current" routerLinkActive="bg-blue-50 text-blue-600" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer">Budgets</a>
+        <a routerLink="/transactions" routerLinkActive="bg-blue-50 text-blue-600" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-blue-50 hover:text-blue-600 cursor-pointer">Transactions</a>
       </div>
       <div class="pt-4 pb-3 border-t border-gray-200">
         <div class="flex items-center px-4">

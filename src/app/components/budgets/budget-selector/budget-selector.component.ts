@@ -20,7 +20,7 @@ import { BudgetService, BudgetCreate } from '../../../services/budget.service';
             <select 
               id="month" 
               formControlName="month" 
-              class="w-full p-2 border rounded-md"
+              class="w-full p-2 border rounded-md cursor-pointer"
               (change)="checkBudgetExists()">
               @for (month of months; track month.value) {
                 <option [value]="month.value">{{ month.name }}</option>
@@ -33,7 +33,7 @@ import { BudgetService, BudgetCreate } from '../../../services/budget.service';
             <select 
               id="year" 
               formControlName="year" 
-              class="w-full p-2 border rounded-md"
+              class="w-full p-2 border rounded-md cursor-pointer"
               (change)="checkBudgetExists()">
               @for (year of years; track year) {
                 <option [value]="year">{{ year }}</option>

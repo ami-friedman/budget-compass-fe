@@ -12,7 +12,7 @@
             <select
               [ngModel]="selectedMonth()"
               (ngModelChange)="onMonthChange($event)"
-              class="block w-40 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              class="block w-40 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm cursor-pointer"
             >
               @for (month of months; track month.value) {
                 <option [value]="month.value">{{ month.label }}</option>
@@ -23,7 +23,7 @@
             <select
               [ngModel]="selectedYear()"
               (ngModelChange)="onYearChange($event)"
-              class="block w-28 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+              class="block w-28 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm cursor-pointer"
             >
               @for (year of years; track year) {
                 <option [value]="year">{{ year }}</option>
@@ -57,7 +57,7 @@
           </p>
           <a
             routerLink="/budgets/create"
-            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer"
           >
             Create Budget
           </a>
