@@ -45,6 +45,44 @@ export interface BudgetSummary {
   monthlyAmount: number;
 }
 
+// Month's End Summary Models
+export interface CategorySummary {
+  budgeted: number;
+  actual: number;
+  variance: number;
+  variance_percentage: number;
+}
+
+export interface ExpenseBreakdown {
+  cash: CategorySummary;
+  monthly: CategorySummary;
+  savings: CategorySummary;
+}
+
+export interface ExpensesSummary {
+  total_budgeted: number;
+  total_actual: number;
+  total_variance: number;
+  breakdown: ExpenseBreakdown;
+}
+
+export interface NetPosition {
+  budgeted: number;
+  actual: number;
+  variance: number;
+}
+
+export interface MonthsEndSummary {
+  budget_id: number | null;
+  month: number;
+  year: number;
+  budget_name: string | null;
+  has_budget: boolean;
+  income: CategorySummary;
+  expenses: ExpensesSummary;
+  net_position: NetPosition;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -213,6 +251,14 @@ export class BudgetService {
       month: now.getMonth() + 1, // JavaScript months are 0-indexed
       year: now.getFullYear()
     };
+  }
+  
+  // Month's End Summary
+  getMonthsEndSummary(month: number, year: number): Observable<MonthsEndSummary> {
+    return this.http.get<MonthsEndSummary>(
+      `${this.apiUrl}/months-end-summary`,
+      { params: { month: month.toString(), year: year.toString() } }
+    );
   }
   
   // Initialize data

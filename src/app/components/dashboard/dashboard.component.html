@@ -1,49 +1,237 @@
 <div class="min-h-screen bg-gray-100">
-
   <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <div class="px-4 py-6 sm:px-0">
-      <div class="bg-white shadow rounded-lg p-6">
-        <h2 class="text-lg font-medium mb-4">Dashboard</h2>
-        
-        <div *ngIf="loading" class="text-center py-4">
-          <p>Loading user data...</p>
-        </div>
-        
-        <div *ngIf="error" class="bg-red-100 text-red-700 p-4 rounded-md mb-4">
-          {{ error }}
-        </div>
-        
-        <div *ngIf="!loading && !error">
+      
+      <!-- Header with Month/Year Selection -->
+      <div class="bg-white shadow rounded-lg p-6 mb-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <h2 class="text-2xl font-bold text-gray-900">Month's End Summary</h2>
           
-          <p class="mb-4">Welcome to Budget Compass! This is your dashboard.</p>
-          
-          <div class="flex flex-col space-y-4 mt-6">
-            <a
-              routerLink="/budgets/current"
-              class="inline-flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <div class="flex gap-3">
+            <!-- Month Selector -->
+            <select
+              [ngModel]="selectedMonth()"
+              (ngModelChange)="onMonthChange($event)"
+              class="block w-40 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             >
-              <span class="mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                </svg>
-              </span>
-              Select or Create Budget
-            </a>
+              @for (month of months; track month.value) {
+                <option [value]="month.value">{{ month.label }}</option>
+              }
+            </select>
             
-            <a
-              routerLink="/budgets/create"
-              class="inline-flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            <!-- Year Selector -->
+            <select
+              [ngModel]="selectedYear()"
+              (ngModelChange)="onYearChange($event)"
+              class="block w-28 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             >
-              <span class="mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-                </svg>
-              </span>
-              Create New Budget
-            </a>
+              @for (year of years; track year) {
+                <option [value]="year">{{ year }}</option>
+              }
+            </select>
           </div>
         </div>
       </div>
+
+      <!-- Loading State -->
+      @if (loading()) {
+        <div class="bg-white shadow rounded-lg p-12 text-center">
+          <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p class="mt-4 text-gray-600">Loading summary...</p>
+        </div>
+      }
+
+      <!-- Error State -->
+      @if (error() && !loading()) {
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p class="text-red-800">{{ error() }}</p>
+        </div>
+      }
+
+      <!-- No Budget State -->
+      @if (!loading() && !error() && !hasData()) {
+        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
+          <h3 class="text-lg font-medium text-yellow-900 mb-2">No Budget Found</h3>
+          <p class="text-yellow-700 mb-4">
+            No budget exists for {{ selectedMonthName() }} {{ selectedYear() }}.
+          </p>
+          <a
+            routerLink="/budgets/create"
+            class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+          >
+            Create Budget
+          </a>
+        </div>
+      }
+
+      <!-- Summary Display -->
+      @if (!loading() && !error() && hasData() && summary()) {
+        <div class="space-y-6">
+          
+          <!-- Income Section -->
+          <div class="bg-white shadow rounded-lg p-6">
+            <div class="flex items-center mb-4">
+              <svg class="h-6 w-6 text-green-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h3 class="text-lg font-semibold text-gray-900">Income</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <p class="text-sm text-gray-500">Budgeted</p>
+                <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(summary()!.income.budgeted) }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Actual</p>
+                <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(summary()!.income.actual) }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Variance</p>
+                <p class="text-2xl font-bold" [ngClass]="getVarianceClass(summary()!.income.variance, false)">
+                  {{ formatCurrency(summary()!.income.variance) }}
+                  <span class="text-lg ml-1">{{ getVarianceIcon(summary()!.income.variance, false) }}</span>
+                </p>
+                @if (Math.abs(summary()!.income.variance_percentage) > 5) {
+                  <p class="text-sm" [ngClass]="getVarianceClass(summary()!.income.variance, false)">
+                    {{ formatPercentage(summary()!.income.variance_percentage) }}
+                  </p>
+                }
+              </div>
+            </div>
+          </div>
+
+          <!-- Expenses Section -->
+          <div class="bg-white shadow rounded-lg p-6">
+            <div class="flex items-center mb-4">
+              <svg class="h-6 w-6 text-red-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+              <h3 class="text-lg font-semibold text-gray-900">Expenses</h3>
+            </div>
+            
+            <!-- Total Expenses -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 pb-6 border-b border-gray-200">
+              <div>
+                <p class="text-sm text-gray-500">Total Budgeted</p>
+                <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(summary()!.expenses.total_budgeted) }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Total Actual</p>
+                <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(summary()!.expenses.total_actual) }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Total Variance</p>
+                <p class="text-2xl font-bold" [ngClass]="getVarianceClass(summary()!.expenses.total_variance, true)">
+                  {{ formatCurrency(summary()!.expenses.total_variance) }}
+                  <span class="text-lg ml-1">{{ getVarianceIcon(summary()!.expenses.total_variance, true) }}</span>
+                </p>
+              </div>
+            </div>
+
+            <!-- Expense Breakdown -->
+            <h4 class="text-md font-semibold text-gray-700 mb-4">Breakdown</h4>
+            
+            <div class="space-y-4">
+              <!-- Cash -->
+              <div class="bg-gray-50 rounded-lg p-4">
+                <h5 class="font-medium text-gray-900 mb-3">💵 Cash</h5>
+                <div class="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p class="text-gray-500">Budgeted</p>
+                    <p class="font-semibold">{{ formatCurrency(summary()!.expenses.breakdown.cash.budgeted) }}</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Actual</p>
+                    <p class="font-semibold">{{ formatCurrency(summary()!.expenses.breakdown.cash.actual) }}</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Variance</p>
+                    <p class="font-semibold" [ngClass]="getVarianceClass(summary()!.expenses.breakdown.cash.variance, true)">
+                      {{ formatCurrency(summary()!.expenses.breakdown.cash.variance) }}
+                      {{ getVarianceIcon(summary()!.expenses.breakdown.cash.variance, true) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Monthly -->
+              <div class="bg-gray-50 rounded-lg p-4">
+                <h5 class="font-medium text-gray-900 mb-3">📅 Monthly</h5>
+                <div class="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p class="text-gray-500">Budgeted</p>
+                    <p class="font-semibold">{{ formatCurrency(summary()!.expenses.breakdown.monthly.budgeted) }}</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Actual</p>
+                    <p class="font-semibold">{{ formatCurrency(summary()!.expenses.breakdown.monthly.actual) }}</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Variance</p>
+                    <p class="font-semibold" [ngClass]="getVarianceClass(summary()!.expenses.breakdown.monthly.variance, true)">
+                      {{ formatCurrency(summary()!.expenses.breakdown.monthly.variance) }}
+                      {{ getVarianceIcon(summary()!.expenses.breakdown.monthly.variance, true) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Savings -->
+              <div class="bg-gray-50 rounded-lg p-4">
+                <h5 class="font-medium text-gray-900 mb-3">💰 Savings (Funding)</h5>
+                <div class="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p class="text-gray-500">Budgeted</p>
+                    <p class="font-semibold">{{ formatCurrency(summary()!.expenses.breakdown.savings.budgeted) }}</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Actual</p>
+                    <p class="font-semibold">{{ formatCurrency(summary()!.expenses.breakdown.savings.actual) }}</p>
+                  </div>
+                  <div>
+                    <p class="text-gray-500">Variance</p>
+                    <p class="font-semibold" [ngClass]="getVarianceClass(summary()!.expenses.breakdown.savings.variance, true)">
+                      {{ formatCurrency(summary()!.expenses.breakdown.savings.variance) }}
+                      {{ getVarianceIcon(summary()!.expenses.breakdown.savings.variance, true) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Net Position Section -->
+          <div class="bg-white shadow rounded-lg p-6">
+            <div class="flex items-center mb-4">
+              <svg class="h-6 w-6 text-blue-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <h3 class="text-lg font-semibold text-gray-900">Net Position</h3>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <p class="text-sm text-gray-500">Budgeted</p>
+                <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(summary()!.net_position.budgeted) }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Actual</p>
+                <p class="text-2xl font-bold text-gray-900">{{ formatCurrency(summary()!.net_position.actual) }}</p>
+              </div>
+              <div>
+                <p class="text-sm text-gray-500">Variance</p>
+                <p class="text-2xl font-bold" [ngClass]="getVarianceClass(summary()!.net_position.variance, false)">
+                  {{ formatCurrency(summary()!.net_position.variance) }}
+                  <span class="text-lg ml-1">{{ getVarianceIcon(summary()!.net_position.variance, false) }}</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      }
+
     </div>
   </div>
 </div>
