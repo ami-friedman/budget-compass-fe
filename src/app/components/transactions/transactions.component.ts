@@ -8,7 +8,7 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
-import { TransactionService, Transaction, TransactionCreate } from '../../services/transaction.service';
+import { TransactionService, Transaction, TransactionCreate, SavingsCategoryBalance } from '../../services/transaction.service';
 import { BudgetService } from '../../services/budget.service';
 import { CategoryService } from '../../services/category.service';
 
@@ -127,15 +127,58 @@ interface BudgetItemOption {
                   </select>
                 } @else {
                   <select formControlName="category_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200">
-                    <option [ngValue]="null" disabled>Select a savings category</option>
-                    @for (option of budgetItemOptions(); track option.value) {
-                      <option [value]="option.value">{{ option.label }}</option>
+                    @if (budgetItemOptions().length === 0) {
+                      <option [ngValue]="null" disabled>No funded savings categories yet</option>
+                    } @else {
+                      <option [ngValue]="null" disabled>Select a savings category</option>
+                      @for (option of budgetItemOptions(); track option.value) {
+                        <option [value]="option.value">{{ option.label }}</option>
+                      }
                     }
                   </select>
                 }
                 <div class="label py-1">
-                  <span class="label-text-alt text-xs text-base-content/60">Choose the budget category for this transaction</span>
+                  @if (activeAccountType() === 'savings' && budgetItemOptions().length === 0) {
+                    <span class="label-text-alt text-xs text-warning">
+                      <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      Fund a savings category from the Checking Account tab first
+                    </span>
+                  } @else {
+                    <span class="label-text-alt text-xs text-base-content/60">Choose the budget category for this transaction</span>
+                  }
                 </div>
+                
+                <!-- Display available balance for savings transactions -->
+                @if (activeAccountType() === 'savings' && selectedCategoryBalance()) {
+                  <div class="mt-2 p-3 rounded-lg" [ngClass]="selectedCategoryBalance()!.available_balance > 0 ? 'bg-success/10 border border-success/30' : 'bg-warning/10 border border-warning/30'">
+                    <div class="flex items-center gap-2 mb-1">
+                      <svg class="w-4 h-4" [ngClass]="selectedCategoryBalance()!.available_balance > 0 ? 'text-success' : 'text-warning'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                      </svg>
+                      <span class="font-semibold text-sm" [ngClass]="selectedCategoryBalance()!.available_balance > 0 ? 'text-success' : 'text-warning'">
+                        Available Balance
+                      </span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                      <div>
+                        <span class="text-base-content/60">Funded:</span>
+                        <span class="ml-1 font-medium">{{ selectedCategoryBalance()!.funded_amount | currency:'ILS':'symbol-narrow':'1.2-2' }}</span>
+                      </div>
+                      <div>
+                        <span class="text-base-content/60">Spent:</span>
+                        <span class="ml-1 font-medium">{{ selectedCategoryBalance()!.spent_amount | currency:'ILS':'symbol-narrow':'1.2-2' }}</span>
+                      </div>
+                      <div>
+                        <span class="text-base-content/60">Available:</span>
+                        <span class="ml-1 font-bold" [ngClass]="selectedCategoryBalance()!.available_balance > 0 ? 'text-success' : 'text-warning'">
+                          {{ selectedCategoryBalance()!.available_balance | currency:'ILS':'symbol-narrow':'1.2-2' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                }
               </div>
 
               <!-- Account Display (Read-only) -->
@@ -206,6 +249,46 @@ interface BudgetItemOption {
               <p [ngClass]="tabs[activeTabIndex()].textClass">
                 Transactions: {{ getAccountTransactions().length }}
               </p>
+              
+              <!-- Savings Account Balances Summary -->
+              @if (activeAccountType() === 'savings' && transactionService.savingsBalances().length > 0) {
+                <div class="mt-4 pt-4 border-t border-green-200">
+                  <h4 class="text-sm font-semibold mb-2 text-green-900">Category Balances</h4>
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                    @for (balance of transactionService.savingsBalances(); track balance.category_id) {
+                      <div class="text-xs p-2 bg-white rounded border border-green-200">
+                        <div class="font-medium text-green-900 mb-1">{{ balance.category_name }}</div>
+                        <div class="flex justify-between">
+                          <span class="text-green-700">Available:</span>
+                          <span class="font-semibold" [ngClass]="balance.available_balance > 0 ? 'text-success' : 'text-warning'">
+                            {{ balance.available_balance | currency:'ILS':'symbol-narrow':'1.2-2' }}
+                          </span>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                  <div class="mt-3 pt-3 border-t border-green-200 grid grid-cols-3 gap-2 text-sm">
+                    <div>
+                      <span class="text-green-700">Total Funded:</span>
+                      <div class="font-semibold text-green-900">
+                        {{ transactionService.totalFundedAmount() | currency:'ILS':'symbol-narrow':'1.2-2' }}
+                      </div>
+                    </div>
+                    <div>
+                      <span class="text-green-700">Total Spent:</span>
+                      <div class="font-semibold text-green-900">
+                        {{ transactionService.totalSpentFromSavings() | currency:'ILS':'symbol-narrow':'1.2-2' }}
+                      </div>
+                    </div>
+                    <div>
+                      <span class="text-green-700">Total Available:</span>
+                      <div class="font-bold text-success">
+                        {{ transactionService.totalAvailableSavings() | currency:'ILS':'symbol-narrow':'1.2-2' }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
             </div>
             
             <div class="overflow-x-auto">
@@ -310,6 +393,7 @@ export class TransactionsComponent {
 
   isEditing = signal(false);
   editingTransaction = signal<Transaction | null>(null);
+  selectedCategoryBalance = signal<SavingsCategoryBalance | null>(null);
 
   selectedBudget = computed(() => this.budgetService.currentBudget());
   activeTabIndex = signal(0); // Track active tab (0: Checking, 1: Savings)
@@ -357,13 +441,13 @@ export class TransactionsComponent {
         };
       });
     } else {
-      // For savings account: show only savings categories (not budget items)
-      const savingsCategories = categories.filter(cat => cat.is_active);
-      // Note: We'll need to filter by category type "savings" once that's available in the category model
+      // For savings account: show only categories that have been funded (have a balance)
+      const savingsBalances = this.transactionService.savingsBalances();
       
-      return savingsCategories.map(category => ({
-        label: category.name,
-        value: category.id,
+      // Only show categories that have been funded at some point
+      return savingsBalances.map(balance => ({
+        label: balance.category_name,
+        value: balance.category_id,
         categoryType: 'savings'
       }));
     }
@@ -399,10 +483,34 @@ export class TransactionsComponent {
 
     // Ensure categories are loaded for the dropdown
     this.categoryService.loadCategories().subscribe();
+
+    // Load savings balances
+    this.transactionService.loadSavingsBalances();
+
+    // Watch for category selection changes to update balance display
+    effect(() => {
+      const categoryId = this.transactionForm.get('category_id')?.value;
+      if (categoryId && this.activeAccountType() === 'savings') {
+        this.updateSelectedCategoryBalance(categoryId);
+      } else {
+        this.selectedCategoryBalance.set(null);
+      }
+    });
+  }
+
+  async updateSelectedCategoryBalance(categoryId: number): Promise<void> {
+    const balance = await this.transactionService.getCategoryBalance(categoryId);
+    this.selectedCategoryBalance.set(balance);
   }
 
   onTabChange(event: any): void {
     this.activeTabIndex.set(event.index);
+    
+    // Reload savings balances when switching to savings tab
+    if (this.tabs[event.index].accountType === 'savings') {
+      this.transactionService.loadSavingsBalances();
+    }
+    
     // Reset form when switching tabs (unless editing)
     if (!this.isEditing()) {
       this.transactionForm.reset({
@@ -507,6 +615,19 @@ export class TransactionsComponent {
       });
       return;
     }
+
+    // Validate savings balance
+    if (accountType === 'savings') {
+      const balance = this.selectedCategoryBalance();
+      if (balance && formValue.amount > balance.available_balance) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Insufficient Balance',
+          detail: `Available balance is ${balance.available_balance.toFixed(2)}. Cannot spend ${formValue.amount.toFixed(2)}.`
+        });
+        return;
+      }
+    }
     
     const transactionData: TransactionCreate = {
       description: formValue.description,
@@ -535,7 +656,11 @@ export class TransactionsComponent {
             summary: 'Success',
             detail: 'Transaction created successfully'
           });
-          // The service handles the optimistic update, no need to reload.
+          // Reload savings balances after creating a transaction
+          if (accountType === 'savings' ||
+              (accountType === 'checking' && this.isSavingsBudgetItem(formValue.budget_item_id))) {
+            await this.transactionService.loadSavingsBalances();
+          }
         }
       }
       this.resetForm();
@@ -572,5 +697,13 @@ export class TransactionsComponent {
         detail: 'Failed to delete transaction'
       });
     }
+  }
+
+  // Helper to check if a budget item is a savings type
+  isSavingsBudgetItem(budgetItemId: number | null): boolean {
+    if (!budgetItemId) return false;
+    const budgetItems = this.budgetService.budgetItems();
+    const item = budgetItems.find(bi => bi.id === budgetItemId);
+    return item?.category_type === 'savings';
   }
 }

@@ -51,6 +51,16 @@ export interface TransactionSummary {
   };
 }
 
+export interface SavingsCategoryBalance {
+  id?: number;
+  category_id: number;
+  category_name: string;
+  funded_amount: number;
+  spent_amount: number;
+  available_balance: number;
+  updated_at?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -63,12 +73,14 @@ export class TransactionService {
   private loadingSignal = signal<boolean>(false);
   private errorSignal = signal<string | null>(null);
   private selectedBudgetIdSignal = signal<number | null>(null);
+  private savingsBalancesSignal = signal<SavingsCategoryBalance[]>([]);
 
   // Readonly signals for components
   readonly transactions = this.transactionsSignal.asReadonly();
   readonly loading = this.loadingSignal.asReadonly();
   readonly error = this.errorSignal.asReadonly();
   readonly selectedBudgetId = this.selectedBudgetIdSignal.asReadonly();
+  readonly savingsBalances = this.savingsBalancesSignal.asReadonly();
 
   // Computed signals for derived state
   readonly checkingTransactions = computed(() =>
@@ -273,8 +285,8 @@ export class TransactionService {
   // Get transactions grouped by category for display
   getTransactionsByCategory(accountType: 'checking' | 'savings') {
     return computed(() => {
-      const transactions = accountType === 'checking' 
-        ? this.checkingTransactions() 
+      const transactions = accountType === 'checking'
+        ? this.checkingTransactions()
         : this.savingsTransactions();
       
       const grouped: Record<string, Transaction[]> = {};
@@ -292,4 +304,62 @@ export class TransactionService {
       return grouped;
     });
   }
+
+  // Savings balance methods
+  async loadSavingsBalances(): Promise<void> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      const balances = await this.http.get<SavingsCategoryBalance[]>(
+        `${this.baseUrl}/savings/balances`
+      ).toPromise();
+
+      this.savingsBalancesSignal.set(balances || []);
+    } catch (error) {
+      console.error('Error loading savings balances:', error);
+      this.errorSignal.set('Failed to load savings balances');
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  async getCategoryBalance(categoryId: number): Promise<SavingsCategoryBalance | null> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      const balance = await this.http.get<SavingsCategoryBalance>(
+        `${this.baseUrl}/savings/balances/${categoryId}`
+      ).toPromise();
+
+      return balance || null;
+    } catch (error) {
+      console.error('Error loading category balance:', error);
+      this.errorSignal.set('Failed to load category balance');
+      return null;
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
+  // Get balance for a specific category from the cached balances
+  getBalanceForCategory(categoryId: number): SavingsCategoryBalance | undefined {
+    return this.savingsBalances().find(b => b.category_id === categoryId);
+  }
+
+  // Computed signal for total available savings balance
+  readonly totalAvailableSavings = computed(() =>
+    this.savingsBalances().reduce((sum, b) => sum + b.available_balance, 0)
+  );
+
+  // Computed signal for total funded amount
+  readonly totalFundedAmount = computed(() =>
+    this.savingsBalances().reduce((sum, b) => sum + b.funded_amount, 0)
+  );
+
+  // Computed signal for total spent from savings
+  readonly totalSpentFromSavings = computed(() =>
+    this.savingsBalances().reduce((sum, b) => sum + b.spent_amount, 0)
+  );
 }
