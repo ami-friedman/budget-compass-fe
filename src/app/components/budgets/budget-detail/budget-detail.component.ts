@@ -138,7 +138,7 @@ export class BudgetDetailComponent implements OnInit {
     
     if (this.editingItemId) {
       // Update existing item
-      this.http.put(`${this.budgetService['apiUrl']}/${budgetId}/items/${this.editingItemId}`, formData)
+      this.http.patch(`${this.budgetService['apiUrl']}/${budgetId}/items/${this.editingItemId}`, formData)
         .subscribe({
           next: (updatedItem: any) => {
             // Update the local state
