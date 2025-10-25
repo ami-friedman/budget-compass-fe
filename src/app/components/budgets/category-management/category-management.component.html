@@ -21,108 +21,74 @@
     </div>
 
     <!-- Categories Dropdown -->
-    <div class="dropdown-container">
+    <div>
       <p-card header="Categories">
-        <!-- Dropdown Toggle Button -->
-        <div class="mb-4">
-          <p-button
-            (click)="toggleDropdown()"
-            [label]="selectedCategory ? selectedCategory.name : 'Select a category to manage'"
-            icon="pi pi-chevron-down"
-            styleClass="w-full justify-between p-button-outlined"
-            [iconPos]="'right'"
-          ></p-button>
-        </div>
-
-        <!-- Dropdown Content -->
-        @if (showDropdown) {
-          <div class="border rounded-lg shadow-lg bg-white max-h-96 overflow-y-auto relative z-10">
-            <!-- Search Input -->
-            <div class="p-3 border-b">
-              <input
-                pInputText
-                type="text"
-                [(ngModel)]="searchValue"
-                placeholder="Search categories..."
-                class="w-full text-gray-900 bg-white"
-              />
-            </div>
-
-            <!-- Categories List -->
-            <div class="max-h-64 overflow-y-auto">
-              @for (category of categories(); track category.id) {
-                @if (!searchValue || category.name.toLowerCase().includes(searchValue.toLowerCase())) {
-                  <div class="flex items-center justify-between p-3 border-b hover:bg-gray-50">
-                    <div class="flex-1 cursor-pointer" (click)="selectCategory(category)">
-                      @if (editingCategoryId === category.id) {
-                        <input
-                          pInputText
-                          type="text"
-                          [(ngModel)]="editingCategoryName"
-                          (keyup.enter)="saveCategory(category.id)"
-                          (keyup.escape)="cancelEdit()"
-                          (click)="$event.stopPropagation()"
-                          class="w-full text-gray-900 bg-white"
-                          autofocus
-                        />
-                      } @else {
-                        <span class="text-lg text-gray-900">{{ category.name }}</span>
-                      }
-                    </div>
-                    <div class="flex items-center gap-2 ml-4" (click)="$event.stopPropagation()">
-                      @if (editingCategoryId === category.id) {
-                        <p-button
-                          (click)="saveCategory(category.id)"
-                          icon="pi pi-check"
-                          label="Save"
-                          styleClass="p-button-sm p-button-success"
-                        ></p-button>
-                        <p-button
-                          (click)="cancelEdit()"
-                          icon="pi pi-times"
-                          label="Cancel"
-                          styleClass="p-button-sm p-button-secondary"
-                        ></p-button>
-                      } @else {
-                        <p-button
-                          (click)="startEdit(category)"
-                          icon="pi pi-pencil"
-                          label="Edit"
-                          styleClass="p-button-sm p-button-outlined"
-                        ></p-button>
-                        <p-button
-                          (click)="archiveCategory(category.id)"
-                          icon="pi pi-archive"
-                          label="Archive"
-                          styleClass="p-button-sm p-button-danger p-button-outlined"
-                        ></p-button>
-                      }
-                    </div>
-                  </div>
-                }
-              } @empty {
-                <div class="text-center py-8 text-gray-500">
-                  <svg class="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
-                  </svg>
-                  <p>No categories found. Add one to get started!</p>
+        <p-select
+          [(ngModel)]="selectedCategory"
+          [options]="categories()"
+          optionLabel="name"
+          placeholder="Select a category to manage"
+          [filter]="true"
+          filterPlaceholder="Search categories..."
+          [showClear]="true"
+          styleClass="w-full">
+          
+          <!-- Custom item template with edit/archive buttons -->
+          <ng-template pTemplate="item" let-category>
+            <div class="flex items-center justify-between w-full">
+              @if (editingCategoryId === category.id) {
+                <input
+                  pInputText
+                  type="text"
+                  [(ngModel)]="editingCategoryName"
+                  (keyup.enter)="saveCategory(category.id)"
+                  (keyup.escape)="cancelEdit()"
+                  (click)="$event.stopPropagation()"
+                  class="flex-1 text-gray-900 bg-white"
+                  autofocus
+                />
+                <div class="flex gap-1 ml-2" (click)="$event.stopPropagation()">
+                  <p-button
+                    (click)="saveCategory(category.id)"
+                    label="Save"
+                    icon="pi pi-check"
+                    [outlined]="true"
+                    severity="success"
+                    size="small">
+                  </p-button>
+                  <p-button
+                    (click)="cancelEdit()"
+                    label="Cancel"
+                    icon="pi pi-times"
+                    [outlined]="true"
+                    severity="secondary"
+                    size="small">
+                  </p-button>
+                </div>
+              } @else {
+                <span class="flex-1">{{ category.name }}</span>
+                <div class="flex gap-1" (click)="$event.stopPropagation()">
+                  <p-button
+                    (click)="startEdit(category); $event.stopPropagation()"
+                    label="Edit"
+                    icon="pi pi-pencil"
+                    [outlined]="true"
+                    severity="secondary"
+                    size="small">
+                  </p-button>
+                  <p-button
+                    (click)="archiveCategory(category.id); $event.stopPropagation()"
+                    label="Archive"
+                    icon="pi pi-archive"
+                    [outlined]="true"
+                    severity="danger"
+                    size="small">
+                  </p-button>
                 </div>
               }
             </div>
-
-            <!-- Clear Selection Button -->
-            @if (selectedCategory) {
-              <div class="p-3 border-t">
-                <p-button
-                  (click)="clearSelection()"
-                  label="Clear Selection"
-                  icon="pi pi-times"
-                  styleClass="w-full p-button-outlined p-button-secondary"
-                ></p-button>
-              </div>
-            }
-          </div>
-        }
+          </ng-template>
+        </p-select>
       </p-card>
     </div>
   </div>

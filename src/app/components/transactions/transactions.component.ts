@@ -6,6 +6,7 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { TooltipModule } from 'primeng/tooltip';
+import { SelectModule } from 'primeng/select';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
 import { TransactionService, Transaction, TransactionCreate, SavingsCategoryBalance } from '../../services/transaction.service';
@@ -29,7 +30,8 @@ interface BudgetItemOption {
     ButtonModule,
     ToastModule,
     ConfirmDialogModule,
-    TooltipModule
+    TooltipModule,
+    SelectModule
   ],
   providers: [MessageService, ConfirmationService],
   template: `
@@ -149,23 +151,30 @@ interface BudgetItemOption {
                   </span>
                 </label>
                 @if (activeAccountType() === 'checking') {
-                  <select formControlName="budget_item_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200 cursor-pointer">
-                    <option [ngValue]="null" disabled>Select a budget category</option>
-                    @for (option of budgetItemOptions(); track option.value) {
-                      <option [value]="option.value">{{ option.label }}</option>
-                    }
-                  </select>
+                  <p-select
+                    formControlName="budget_item_id"
+                    [options]="budgetItemOptions()"
+                    optionLabel="label"
+                    optionValue="value"
+                    placeholder="Select a budget category"
+                    [filter]="true"
+                    filterPlaceholder="Search budget items..."
+                    [showClear]="false"
+                    styleClass="w-full">
+                  </p-select>
                 } @else {
-                  <select formControlName="category_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200 cursor-pointer">
-                    @if (budgetItemOptions().length === 0) {
-                      <option [ngValue]="null" disabled>No funded savings categories yet</option>
-                    } @else {
-                      <option [ngValue]="null" disabled>Select a savings category</option>
-                      @for (option of budgetItemOptions(); track option.value) {
-                        <option [value]="option.value">{{ option.label }}</option>
-                      }
-                    }
-                  </select>
+                  <p-select
+                    formControlName="category_id"
+                    [options]="budgetItemOptions()"
+                    optionLabel="label"
+                    optionValue="value"
+                    [placeholder]="budgetItemOptions().length === 0 ? 'No funded savings categories yet' : 'Select a savings category'"
+                    [filter]="true"
+                    filterPlaceholder="Search savings categories..."
+                    [disabled]="budgetItemOptions().length === 0"
+                    [showClear]="false"
+                    styleClass="w-full">
+                  </p-select>
                 }
                 <div class="label py-1">
                   @if (activeAccountType() === 'savings' && budgetItemOptions().length === 0) {

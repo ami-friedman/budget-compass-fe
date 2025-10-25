@@ -68,12 +68,17 @@
                 Category
               </span>
             </label>
-            <select formControlName="category_id" class="select select-bordered w-full focus:select-primary transition-colors duration-200 cursor-pointer">
-              <option [ngValue]="null" disabled>Select a category</option>
-              @for (category of categories(); track category.id) {
-                <option [value]="category.id">{{ category.name }}</option>
-              }
-            </select>
+            <p-select
+              formControlName="category_id"
+              [options]="categories()"
+              optionLabel="name"
+              optionValue="id"
+              placeholder="Select a category"
+              [filter]="true"
+              filterPlaceholder="Search categories..."
+              [showClear]="false"
+              styleClass="w-full">
+            </p-select>
             <div class="label py-1">
               <span class="label-text-alt text-xs text-base-content/60">Choose the budget category for this item</span>
             </div>

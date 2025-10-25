@@ -9,11 +9,12 @@ import { CategoryService, Category } from '../../../services/category.service';
 import { NavigationService } from '../../../services/navigation.service';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
+import { SelectModule } from 'primeng/select';
 
 @Component({
   selector: 'app-budget-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, ButtonModule, TooltipModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, ButtonModule, TooltipModule, SelectModule],
   templateUrl: './budget-detail.component.html',
   styleUrls: ['./budget-detail.component.scss']
 })
