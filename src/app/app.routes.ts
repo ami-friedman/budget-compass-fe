@@ -27,16 +27,12 @@ export const routes: Routes = [
         children: [
           {
             path: '',
-            loadComponent: () => import('./components/budgets/budget-selector/budget-selector.component').then(m => m.BudgetSelectorComponent),
+            loadComponent: () => import('./components/budgets/budget-detail/budget-detail.component').then(m => m.BudgetDetailComponent),
             pathMatch: 'full'
           },
           {
             path: 'categories',
             loadComponent: () => import('./components/budgets/category-management/category-management.component').then(m => m.CategoryManagementComponent)
-          },
-          {
-            path: ':id',
-            loadComponent: () => import('./components/budgets/budget-detail/budget-detail.component').then(m => m.BudgetDetailComponent)
           }
         ]
       },
