@@ -1,7 +1,7 @@
 import { Component, OnInit, effect, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 
 import { BudgetService, Budget, BudgetItem } from '../../../services/budget.service';
@@ -13,7 +13,7 @@ import { TooltipModule } from 'primeng/tooltip';
 @Component({
   selector: 'app-budget-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule, ButtonModule, TooltipModule],
+  imports: [CommonModule, RouterModule, ReactiveFormsModule, FormsModule, ButtonModule, TooltipModule],
   templateUrl: './budget-detail.component.html',
   styleUrls: ['./budget-detail.component.scss']
 })
@@ -42,8 +42,8 @@ export class BudgetDetailComponent implements OnInit {
   searchTerm = signal(''); // Search term for filtering items
   
   // Month/Year selection signals
-  private selectedMonthSignal = signal<number>(new Date().getMonth() + 1);
-  private selectedYearSignal = signal<number>(new Date().getFullYear());
+  selectedMonthSignal = signal<number>(new Date().getMonth() + 1);
+  selectedYearSignal = signal<number>(new Date().getFullYear());
   
   readonly selectedMonth = this.selectedMonthSignal.asReadonly();
   readonly selectedYear = this.selectedYearSignal.asReadonly();
@@ -91,19 +91,18 @@ export class BudgetDetailComponent implements OnInit {
     this.budgetItems().filter(item => item.category_type === 'cash')
   );
   
-  ngOnInit(): void {
-    // Initialize the budget item form
-    this.initBudgetItemForm();
-    
-    // Load budget for current month/year on init
-    this.loadBudgetForMonth(this.selectedMonth(), this.selectedYear());
-    
+  constructor() {
     // Reactive effect to load budget when month/year changes
     effect(() => {
       const month = this.selectedMonth();
       const year = this.selectedYear();
       this.loadBudgetForMonth(month, year);
     });
+  }
+  
+  ngOnInit(): void {
+    // Initialize the budget item form
+    this.initBudgetItemForm();
   }
   
   loadBudgetForMonth(month: number, year: number): void {
@@ -256,14 +255,4 @@ export class BudgetDetailComponent implements OnInit {
     }
   }
   
-  // Month/Year selection methods
-  onMonthChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.selectedMonthSignal.set(parseInt(target.value, 10));
-  }
-  
-  onYearChange(event: Event): void {
-    const target = event.target as HTMLSelectElement;
-    this.selectedYearSignal.set(parseInt(target.value, 10));
-  }
 }

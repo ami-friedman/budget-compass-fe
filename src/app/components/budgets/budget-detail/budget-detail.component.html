@@ -5,8 +5,8 @@
     <div class="flex items-center gap-2">
       <label class="text-sm font-medium text-base-content">Month:</label>
       <select
-        [value]="selectedMonth()"
-        (change)="onMonthChange($event)"
+        [ngModel]="selectedMonth()"
+        (ngModelChange)="selectedMonthSignal.set(+$event)"
         class="select select-bordered select-sm">
         <option [value]="1">January</option>
         <option [value]="2">February</option>
@@ -23,8 +23,8 @@
       </select>
       <label class="text-sm font-medium text-base-content">Year:</label>
       <select
-        [value]="selectedYear()"
-        (change)="onYearChange($event)"
+        [ngModel]="selectedYear()"
+        (ngModelChange)="selectedYearSignal.set(+$event)"
         class="select select-bordered select-sm">
         @for (year of yearOptions(); track year) {
           <option [value]="year">{{ year }}</option>
