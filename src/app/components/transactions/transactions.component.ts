@@ -35,8 +35,38 @@ interface BudgetItemOption {
   template: `
     <div class="container mx-auto p-4">
       @if (selectedBudget()) {
-        <div class="mb-6">
-          <h2 class="text-3xl font-bold">{{ selectedBudget()!.name }} - Transactions</h2>
+        <!-- Month/Year Selection -->
+        <div class="mb-6 flex items-center gap-4">
+          <h2 class="text-3xl font-bold flex-grow">{{ selectedMonthName() }} {{ selectedYear() }}</h2>
+          <div class="flex items-center gap-2">
+            <label class="text-sm font-medium text-base-content">Month:</label>
+            <select
+              [ngModel]="selectedMonth()"
+              (ngModelChange)="selectedMonthSignal.set(+$event)"
+              class="select select-bordered select-sm">
+              <option [value]="1">January</option>
+              <option [value]="2">February</option>
+              <option [value]="3">March</option>
+              <option [value]="4">April</option>
+              <option [value]="5">May</option>
+              <option [value]="6">June</option>
+              <option [value]="7">July</option>
+              <option [value]="8">August</option>
+              <option [value]="9">September</option>
+              <option [value]="10">October</option>
+              <option [value]="11">November</option>
+              <option [value]="12">December</option>
+            </select>
+            <label class="text-sm font-medium text-base-content">Year:</label>
+            <select
+              [ngModel]="selectedYear()"
+              (ngModelChange)="selectedYearSignal.set(+$event)"
+              class="select select-bordered select-sm">
+              @for (year of yearOptions(); track year) {
+                <option [value]="year">{{ year }}</option>
+              }
+            </select>
+          </div>
         </div>
 
         <!-- Add Transaction Form -->
@@ -395,6 +425,28 @@ export class TransactionsComponent {
   editingTransaction = signal<Transaction | null>(null);
   selectedCategoryBalance = signal<SavingsCategoryBalance | null>(null);
 
+  // Month/Year selection signals
+  selectedMonthSignal = signal<number>(new Date().getMonth() + 1);
+  selectedYearSignal = signal<number>(new Date().getFullYear());
+  
+  readonly selectedMonth = this.selectedMonthSignal.asReadonly();
+  readonly selectedYear = this.selectedYearSignal.asReadonly();
+  
+  // Computed signal for month name
+  readonly selectedMonthName = computed(() =>
+    this.budgetService.getMonthName(this.selectedMonth())
+  );
+  
+  // Year options for dropdown (current year ± 5 years)
+  readonly yearOptions = computed(() => {
+    const currentYear = new Date().getFullYear();
+    const years: number[] = [];
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+      years.push(i);
+    }
+    return years;
+  });
+
   selectedBudget = computed(() => this.budgetService.currentBudget());
   activeTabIndex = signal(0); // Track active tab (0: Checking, 1: Savings)
 
@@ -467,14 +519,15 @@ export class TransactionsComponent {
       this.budgetService.initialize();
     }
 
-    // Reactive effect to load transactions when the selected budget changes
+    // Reactive effect to load transactions when month/year or budget changes
     effect(() => {
       const budget = this.selectedBudget();
+      const month = this.selectedMonth();
+      const year = this.selectedYear();
       
       if (budget) {
-        // Always load ALL transactions for the budget (both checking and savings)
-        // The UI will filter them appropriately based on the active tab
-        this.transactionService.setSelectedBudget(budget.id);
+        // Load transactions filtered by selected month/year
+        this.transactionService.loadTransactionsForMonth(budget.id, month, year);
       } else {
         // If there's no budget, clear the transactions
         this.transactionService.clearTransactions();
@@ -706,4 +759,5 @@ export class TransactionsComponent {
     const item = budgetItems.find(bi => bi.id === budgetItemId);
     return item?.category_type === 'savings';
   }
+  
 }

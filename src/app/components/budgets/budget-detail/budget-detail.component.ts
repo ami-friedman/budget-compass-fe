@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, computed, signal } from '@angular/core';
+import { Component, OnInit, effect, inject, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -41,6 +41,28 @@ export class BudgetDetailComponent implements OnInit {
   activeTabIndex = signal(0); // Track active tab (0: Cash, 1: Monthly, 2: Savings, 3: Income)
   searchTerm = signal(''); // Search term for filtering items
   
+  // Month/Year selection signals
+  private selectedMonthSignal = signal<number>(new Date().getMonth() + 1);
+  private selectedYearSignal = signal<number>(new Date().getFullYear());
+  
+  readonly selectedMonth = this.selectedMonthSignal.asReadonly();
+  readonly selectedYear = this.selectedYearSignal.asReadonly();
+  
+  // Computed signal for month name
+  readonly selectedMonthName = computed(() =>
+    this.budgetService.getMonthName(this.selectedMonth())
+  );
+  
+  // Year options for dropdown (current year ± 5 years)
+  readonly yearOptions = computed(() => {
+    const currentYear = new Date().getFullYear();
+    const years: number[] = [];
+    for (let i = currentYear - 5; i <= currentYear + 5; i++) {
+      years.push(i);
+    }
+    return years;
+  });
+  
   // Tab configuration
   tabs = [
     { label: 'Cash', categoryType: 'cash', color: 'text-orange-600' },
@@ -70,37 +92,46 @@ export class BudgetDetailComponent implements OnInit {
   );
   
   ngOnInit(): void {
-    // Get the budget ID from the route
-    this.route.paramMap.subscribe(params => {
-      const budgetId = params.get('id');
-      
-      if (budgetId) {
-        this.loadBudget(parseInt(budgetId, 10));
-      } else {
-        this.router.navigate(['/budgets']);
-      }
-    });
-    
     // Initialize the budget item form
     this.initBudgetItemForm();
+    
+    // Load budget for current month/year on init
+    this.loadBudgetForMonth(this.selectedMonth(), this.selectedYear());
+    
+    // Reactive effect to load budget when month/year changes
+    effect(() => {
+      const month = this.selectedMonth();
+      const year = this.selectedYear();
+      this.loadBudgetForMonth(month, year);
+    });
   }
   
-  loadBudget(budgetId: number): void {
-    // Call the API to get the budget details
-    this.http.get<Budget>(`${this.budgetService['apiUrl']}/${budgetId}`).subscribe({
-      next: (budget: Budget) => {
+  loadBudgetForMonth(month: number, year: number): void {
+    this.budgetService.getBudgetByMonth(month, year).subscribe({
+      next: (budget: Budget | null) => {
         this.budget = budget;
-        // Load budget items
-        this.budgetService.loadBudgetItems(budgetId);
-        // Update breadcrumbs
-        this.navigationService.updateBreadcrumbs([
-          { label: 'Budgets', route: '/budgets' },
-          { label: budget.name, route: null }
-        ]);
+        
+        if (budget) {
+          // Load budget items
+          this.budgetService.loadBudgetItems(budget.id);
+          // Update breadcrumbs
+          this.navigationService.updateBreadcrumbs([
+            { label: 'Budgets', route: '/budgets' },
+            { label: `${this.selectedMonthName()} ${year}`, route: null }
+          ]);
+        } else {
+          // No budget for this month - clear budget items
+          this.budgetService['budgetItemsSignal'].set([]);
+          // Update breadcrumbs
+          this.navigationService.updateBreadcrumbs([
+            { label: 'Budgets', route: '/budgets' },
+            { label: `${this.selectedMonthName()} ${year}`, route: null }
+          ]);
+        }
       },
       error: (error: any) => {
         console.error('Error loading budget:', error);
-        this.router.navigate(['/budgets']);
+        this.budget = null;
       }
     });
   }
@@ -223,5 +254,16 @@ export class BudgetDetailComponent implements OnInit {
         }
       });
     }
+  }
+  
+  // Month/Year selection methods
+  onMonthChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.selectedMonthSignal.set(parseInt(target.value, 10));
+  }
+  
+  onYearChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    this.selectedYearSignal.set(parseInt(target.value, 10));
   }
 }

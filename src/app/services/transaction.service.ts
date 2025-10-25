@@ -160,6 +160,24 @@ export class TransactionService {
     }
   }
 
+  async loadTransactionsForMonth(budgetId: number, month: number, year: number): Promise<void> {
+    this.loadingSignal.set(true);
+    this.errorSignal.set(null);
+
+    try {
+      const transactions = await this.http.get<Transaction[]>(
+        `${this.baseUrl}?budget_id=${budgetId}&month=${month}&year=${year}`
+      ).toPromise();
+
+      this.transactionsSignal.set(transactions || []);
+    } catch (error) {
+      console.error('Error loading transactions:', error);
+      this.errorSignal.set('Failed to load transactions');
+    } finally {
+      this.loadingSignal.set(false);
+    }
+  }
+
   async loadTransactionsByAccount(accountType: 'checking' | 'savings'): Promise<void> {
     this.loadingSignal.set(true);
     this.errorSignal.set(null);

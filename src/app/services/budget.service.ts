@@ -261,6 +261,19 @@ export class BudgetService {
     );
   }
   
+  // Get budget by month and year
+  getBudgetByMonth(month: number, year: number): Observable<Budget | null> {
+    return this.http.get<Budget | null>(
+      `${this.apiUrl}/by-month`,
+      { params: { month: month.toString(), year: year.toString() } }
+    ).pipe(
+      catchError(error => {
+        console.error('Error loading budget by month:', error);
+        return of(null);
+      })
+    );
+  }
+  
   // Initialize data
   initialize(): void {
     this.loadBudgets();
