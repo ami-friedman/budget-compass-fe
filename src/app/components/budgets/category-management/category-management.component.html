@@ -50,19 +50,23 @@
                 <div class="flex gap-1 ml-2" (click)="$event.stopPropagation()">
                   <p-button
                     (click)="saveCategory(category.id)"
-                    label="Save"
                     icon="pi pi-check"
                     [outlined]="true"
+                    [rounded]="true"
                     severity="success"
-                    size="small">
+                    size="small"
+                    pTooltip="Save"
+                    tooltipPosition="top">
                   </p-button>
                   <p-button
                     (click)="cancelEdit()"
-                    label="Cancel"
                     icon="pi pi-times"
                     [outlined]="true"
+                    [rounded]="true"
                     severity="secondary"
-                    size="small">
+                    size="small"
+                    pTooltip="Cancel"
+                    tooltipPosition="top">
                   </p-button>
                 </div>
               } @else {
@@ -70,19 +74,23 @@
                 <div class="flex gap-1" (click)="$event.stopPropagation()">
                   <p-button
                     (click)="startEdit(category); $event.stopPropagation()"
-                    label="Edit"
                     icon="pi pi-pencil"
                     [outlined]="true"
+                    [rounded]="true"
                     severity="secondary"
-                    size="small">
+                    size="small"
+                    pTooltip="Edit"
+                    tooltipPosition="top">
                   </p-button>
                   <p-button
                     (click)="archiveCategory(category.id); $event.stopPropagation()"
-                    label="Archive"
-                    icon="pi pi-archive"
+                    icon="pi pi-trash"
                     [outlined]="true"
+                    [rounded]="true"
                     severity="danger"
-                    size="small">
+                    size="small"
+                    pTooltip="Archive"
+                    tooltipPosition="top">
                   </p-button>
                 </div>
               }
