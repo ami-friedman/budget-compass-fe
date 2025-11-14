@@ -10,7 +10,8 @@
   # Any request the browser makes to /api/...
   from = "/api/*"
   # ...will be secretly forwarded to your live Render backend.
-  to = "https://tri-sphere-budget-be.onrender.com/:splat"
+  # The :splat captures everything after /api/, so we need to include /api in the destination
+  to = "https://tri-sphere-budget-be.onrender.com/api/:splat"
   # The 200 status makes this a silent proxy.
   status = 200
   # Force this rule to take precedence
