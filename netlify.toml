@@ -1,0 +1,22 @@
+# This is the main build configuration for Netlify.
+[build]
+  # This command builds your Angular app for production.
+  command = "ng build"
+  # This is the directory that Netlify will deploy.
+  publish = "dist/budget-compass/browser"
+
+# This is the intelligent proxy rule for your API.
+[[redirects]]
+  # Any request the browser makes to /api/...
+  from = "/api/*"
+  # ...will be secretly forwarded to your live Render backend.
+  to = "https://tri-sphere-budget-be.onrender.com/:splat"
+  # The 200 status makes this a silent proxy.
+  status = 200
+
+# This is the "catch-all" rule for your Single Page Application.
+# It only runs if no other rule matches.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
