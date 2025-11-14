@@ -3,7 +3,7 @@
   # This command builds your Angular app for production.
   command = "ng build"
   # This is the directory that Netlify will deploy.
-  publish = "dist/budget-compass/browser"
+  publish = "dist/budget-compass-frontend/browser"
 
 # This is the intelligent proxy rule for your API.
 [[redirects]]
