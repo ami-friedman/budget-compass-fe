@@ -87,7 +87,7 @@ export interface MonthsEndSummary {
   providedIn: 'root'
 })
 export class BudgetService {
-  private apiUrl = `${environment.apiUrl}/budgets`;
+  private apiUrl = `${environment.baseUrl}/budgets`;
   private http = inject(HttpClient);
   
   // Signal state

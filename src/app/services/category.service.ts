@@ -15,7 +15,7 @@ export interface Category {
 })
 export class CategoryService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/categories`;
+  private apiUrl = `${environment.baseUrl}/categories`;
 
   // Signal to hold the list of categories
   private categoriesSignal = signal<Category[]>([]);

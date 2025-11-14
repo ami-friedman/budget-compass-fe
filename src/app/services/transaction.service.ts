@@ -66,7 +66,7 @@ export interface SavingsCategoryBalance {
 })
 export class TransactionService {
   private http = inject(HttpClient);
-  private baseUrl = `${environment.apiUrl}/transactions`;
+  private baseUrl = `${environment.baseUrl}/transactions`;
 
   // Signals for state management
   private transactionsSignal = signal<Transaction[]>([]);
