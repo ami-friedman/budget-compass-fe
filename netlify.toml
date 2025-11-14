@@ -13,6 +13,8 @@
   to = "https://tri-sphere-budget-be.onrender.com/:splat"
   # The 200 status makes this a silent proxy.
   status = 200
+  # Force this rule to take precedence
+  force = true
 
 # This is the "catch-all" rule for your Single Page Application.
 # It only runs if no other rule matches.
